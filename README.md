@@ -4,6 +4,13 @@ Aplicación de productividad personal y en equipo (estilo Any.do), implementada
 como referencia **clean-room** a partir de la especificación técnica
 *"Especificación técnica modular para una plataforma tipo Any.do"* (RFC v1.0).
 
+Dos entregables en este repositorio:
+
+| Carpeta / archivo | Qué es |
+|---|---|
+| `rumbo.html` | Versión web en un solo archivo (abrir con doble clic, sin instalación) |
+| `rumbo-native/` | **App móvil React Native** (Expo + TypeScript) para iOS/Android — ver [su README](rumbo-native/README.md) |
+
 ## Cómo usarla
 
 `rumbo.html` es un archivo único, autocontenido y sin dependencias externas ni

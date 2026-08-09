@@ -478,9 +478,16 @@ const AISLE_RULES = [
   {cat:'Mascotas', kws:['croquetas','perro','gato','arena']},
 ];
 const AISLE_ORDER = ['Frutas y verduras','Panadería','Lácteos y huevos','Carnes y pescados','Congelados','Despensa','Bebidas','Limpieza','Cuidado personal','Bebé','Mascotas','Otros'];
+// Claves cortas (≤4 letras, ej. "te", "res", "pan") solo cuentan como palabra
+// completa (o su plural); si no, "detergente" caería en Bebidas por contener "te".
+function kwMatches(text, words, kw){
+  if(kw.length > 4) return text.includes(kw);
+  return words.some(w => w === kw || w === kw + 's' || w === kw + 'es');
+}
 function classifyGroceryItem(text){
   const t = text.toLowerCase();
-  for(const rule of AISLE_RULES){ if(rule.kws.some(k => t.includes(k))) return rule.cat; }
+  const words = t.split(/[^a-záéíóúüñ]+/i).filter(Boolean);
+  for(const rule of AISLE_RULES){ if(rule.kws.some(k => kwMatches(t, words, k))) return rule.cat; }
   return 'Otros';
 }
 
