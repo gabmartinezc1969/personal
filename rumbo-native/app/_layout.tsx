@@ -1,9 +1,13 @@
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useFonts, Nunito_600SemiBold, Nunito_700Bold, Nunito_800ExtraBold, Nunito_900Black } from '@expo-google-fonts/nunito';
+import * as SplashScreen from 'expo-splash-screen';
+import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { StoreProvider } from '@/src/state/store';
 import { useTheme } from '@/src/theme/useTheme';
+import { FONTS } from '@/src/theme/fonts';
 
 export { ErrorBoundary } from 'expo-router';
 
@@ -11,7 +15,17 @@ export const unstable_settings = {
   initialRouteName: '(tabs)',
 };
 
+SplashScreen.preventAutoHideAsync();
+
 export default function RootLayout() {
+  const [loaded] = useFonts({ Nunito_600SemiBold, Nunito_700Bold, Nunito_800ExtraBold, Nunito_900Black });
+
+  useEffect(() => {
+    if (loaded) SplashScreen.hideAsync();
+  }, [loaded]);
+
+  if (!loaded) return null;
+
   return (
     <StoreProvider>
       <RootLayoutNav />
@@ -41,7 +55,8 @@ function RootLayoutNav() {
       <Stack
         screenOptions={{
           headerTintColor: colors.text,
-          headerTitleStyle: { fontWeight: '700' },
+          headerTitleStyle: { fontFamily: FONTS.extra, fontSize: 18 },
+          headerShadowVisible: false,
         }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="list/[id]" options={{ title: 'Lista' }} />

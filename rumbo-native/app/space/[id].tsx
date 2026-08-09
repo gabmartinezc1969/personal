@@ -61,7 +61,7 @@ export default function SpaceDetailScreen() {
         )}
         <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
           <TextInput
-            style={{ flex: 1, borderWidth: 1, borderColor: colors.borderStrong, borderRadius: 9, padding: 10, color: colors.text, backgroundColor: colors.bgElev }}
+            style={{ flex: 1, borderWidth: 1, borderColor: colors.borderStrong, borderRadius: 14, padding: 10, color: colors.text, backgroundColor: colors.bgElev }}
             placeholder="Nombre del nuevo tablero…"
             placeholderTextColor={colors.textFaint}
             value={boardDraft}
@@ -82,7 +82,7 @@ export default function SpaceDetailScreen() {
         ))}
         <View style={{ flexDirection: 'row', gap: 8, marginTop: 6 }}>
           <TextInput
-            style={{ flex: 1, borderWidth: 1, borderColor: colors.borderStrong, borderRadius: 9, padding: 10, color: colors.text, backgroundColor: colors.bgElev }}
+            style={{ flex: 1, borderWidth: 1, borderColor: colors.borderStrong, borderRadius: 14, padding: 10, color: colors.text, backgroundColor: colors.bgElev }}
             placeholder="Nombre del miembro…"
             placeholderTextColor={colors.textFaint}
             value={memberDraft}

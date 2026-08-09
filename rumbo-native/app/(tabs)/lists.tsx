@@ -59,7 +59,7 @@ export default function ListsScreen() {
               style={{
                 borderWidth: 1,
                 borderColor: colors.borderStrong,
-                borderRadius: 9,
+                borderRadius: 14,
                 padding: 11,
                 color: colors.text,
                 marginBottom: 14,

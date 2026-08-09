@@ -49,7 +49,7 @@ export default function SettingsScreen() {
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 60 }} keyboardShouldPersistTaps="handled">
         <SectionHeader title="Perfil" />
         <TextInput
-          style={{ borderWidth: 1, borderColor: colors.borderStrong, borderRadius: 9, padding: 11, color: colors.text, backgroundColor: colors.bgElev }}
+          style={{ borderWidth: 1, borderColor: colors.borderStrong, borderRadius: 14, padding: 11, color: colors.text, backgroundColor: colors.bgElev }}
           value={name}
           onChangeText={setName}
           onEndEditing={() => actions.setUserName(name)}

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, Pressable, StyleSheet, ViewStyle, TextStyle, StyleProp } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../theme/useTheme';
+import { FONTS } from '../theme/fonts';
 import { Priority } from '../types/models';
 
 export const PRIORITY_META: Record<Priority, { label: string; colorKey: 'danger' | 'warn' | 'info' | 'textFaint' }> = {
@@ -31,7 +32,7 @@ export function EmptyState({ icon, title, subtitle }: { icon: keyof typeof Ionic
   return (
     <View style={styles.empty}>
       <Ionicons name={icon} size={40} color={colors.textFaint} style={{ opacity: 0.55, marginBottom: 10 }} />
-      <Text style={{ color: colors.textDim, fontWeight: '700', fontSize: 15, marginBottom: 3 }}>{title}</Text>
+      <Text style={{ color: colors.textDim, fontFamily: FONTS.extra, fontSize: 16, marginBottom: 3 }}>{title}</Text>
       {subtitle ? <Text style={{ color: colors.textFaint, textAlign: 'center', fontSize: 13 }}>{subtitle}</Text> : null}
     </View>
   );
@@ -85,7 +86,7 @@ export function Chip({
         },
         style,
       ]}>
-      <Text style={{ color: color || (selected ? colors.brandStrong : colors.textDim), fontSize: 12.5, fontWeight: '600' }}>{label}</Text>
+      <Text style={{ color: color || (selected ? colors.brandStrong : colors.textDim), fontSize: 12.5, fontFamily: FONTS.bold }}>{label}</Text>
     </View>
   );
   if (!onPress) return content;
@@ -103,7 +104,7 @@ export function MetaPill({ icon, label, tone }: { icon?: keyof typeof Ionicons.g
   return (
     <View style={[styles.metaPill, { backgroundColor: bg, borderColor: tone ? 'transparent' : colors.border }]}>
       {icon ? <Ionicons name={icon} size={11} color={fg} /> : null}
-      <Text style={{ color: fg, fontSize: 11, fontWeight: '600' }}>{label}</Text>
+      <Text style={{ color: fg, fontSize: 11, fontFamily: FONTS.bold }}>{label}</Text>
     </View>
   );
 }
@@ -119,7 +120,7 @@ export function Avatar({ name, size = 24 }: { name: string; size?: number }) {
     .toUpperCase();
   return (
     <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: colors.brand, alignItems: 'center', justifyContent: 'center' }}>
-      <Text style={{ color: colors.onBrand, fontSize: size * 0.42, fontWeight: '700' }}>{initials}</Text>
+      <Text style={{ color: colors.onBrand, fontSize: size * 0.42, fontFamily: FONTS.extra }}>{initials}</Text>
     </View>
   );
 }
@@ -130,8 +131,13 @@ export function Card({ children, style, onPress }: { children: React.ReactNode; 
     backgroundColor: colors.bgElev,
     borderColor: colors.border,
     borderWidth: 1,
-    borderRadius: 12,
-    padding: 12,
+    borderRadius: 18,
+    padding: 14,
+    shadowColor: '#1b3a10',
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 1,
   };
   if (onPress)
     return (
@@ -150,6 +156,7 @@ export function Btn({
   small,
   disabled,
   style,
+  textColor,
 }: {
   label: string;
   onPress: () => void;
@@ -158,11 +165,12 @@ export function Btn({
   small?: boolean;
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
+  textColor?: string;
 }) {
   const { colors } = useTheme();
   const bg = kind === 'primary' ? colors.brand : kind === 'danger' ? colors.danger : kind === 'ghost' ? 'transparent' : colors.bgElev;
-  const fg = kind === 'primary' || kind === 'danger' ? '#ffffff' : colors.text;
-  const border = kind === 'primary' ? colors.brand : kind === 'danger' ? colors.danger : kind === 'ghost' ? 'transparent' : colors.borderStrong;
+  const fg = textColor || (kind === 'primary' ? colors.onBrand : kind === 'danger' ? '#ffffff' : colors.text);
+  const border = kind === 'primary' ? colors.brandEdge : kind === 'danger' ? '#B5383C' : kind === 'ghost' ? 'transparent' : colors.borderStrong;
   return (
     <Pressable
       onPress={onPress}
@@ -171,11 +179,17 @@ export function Btn({
       style={({ pressed }) => [
         styles.btn,
         small && styles.btnSm,
-        { backgroundColor: bg, borderColor: border, opacity: disabled ? 0.5 : pressed ? 0.85 : 1 },
+        {
+          backgroundColor: bg,
+          borderColor: border,
+          borderBottomWidth: kind === 'ghost' ? 0 : pressed ? 1 : small ? 3 : 4,
+          marginTop: kind === 'ghost' ? 0 : pressed ? (small ? 2 : 3) : 0,
+          opacity: disabled ? 0.5 : 1,
+        },
         style,
       ]}>
-      {icon ? <Ionicons name={icon} size={small ? 14 : 16} color={fg} /> : null}
-      <Text style={{ color: fg, fontWeight: '700', fontSize: small ? 12.5 : 13.5 }}>{label}</Text>
+      {icon ? <Ionicons name={icon} size={small ? 14 : 17} color={fg} /> : null}
+      <Text style={{ color: fg, fontFamily: FONTS.extra, fontSize: small ? 13 : 15, letterSpacing: 0.2 }}>{label}</Text>
     </Pressable>
   );
 }
@@ -202,32 +216,32 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     paddingHorizontal: 2,
   },
-  sectionHeaderText: { fontSize: 11.5, fontWeight: '800', letterSpacing: 0.7 },
+  sectionHeaderText: { fontSize: 12, fontFamily: FONTS.extra, letterSpacing: 1 },
   empty: { alignItems: 'center', paddingVertical: 40, paddingHorizontal: 24 },
   chip: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 999,
-    borderWidth: 1,
+    borderWidth: 1.5,
   },
   metaPill: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    paddingHorizontal: 7,
-    paddingVertical: 2.5,
-    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 999,
     borderWidth: 1,
   },
   btn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-    borderRadius: 9,
-    borderWidth: 1,
+    gap: 7,
+    paddingHorizontal: 18,
+    paddingVertical: 11,
+    borderRadius: 999,
+    borderWidth: 0,
   },
-  btnSm: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 7 },
+  btnSm: { paddingHorizontal: 13, paddingVertical: 7, borderRadius: 999 },
 });

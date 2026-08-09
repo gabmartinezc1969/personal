@@ -50,7 +50,7 @@ export default function SpacesScreen() {
         )}
         <View style={{ flexDirection: 'row', gap: 8, marginTop: 10 }}>
           <TextInput
-            style={{ flex: 1, borderWidth: 1, borderColor: colors.borderStrong, borderRadius: 9, padding: 10, color: colors.text, backgroundColor: colors.bgElev }}
+            style={{ flex: 1, borderWidth: 1, borderColor: colors.borderStrong, borderRadius: 14, padding: 10, color: colors.text, backgroundColor: colors.bgElev }}
             placeholder="Nombre del nuevo espacio…"
             placeholderTextColor={colors.textFaint}
             value={draft}

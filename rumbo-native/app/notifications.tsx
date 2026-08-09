@@ -25,7 +25,7 @@ export default function NotificationsScreen() {
               onPress={() => actions.markNotifRead(n.id)}
               style={{
                 padding: 12,
-                borderRadius: 10,
+                borderRadius: 16,
                 marginBottom: 6,
                 backgroundColor: n.read ? colors.bgElev : colors.brandDim,
                 borderWidth: 1,

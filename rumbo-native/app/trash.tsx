@@ -35,7 +35,7 @@ export default function TrashScreen() {
         backgroundColor: colors.bgElev,
         borderColor: colors.border,
         borderWidth: 1,
-        borderRadius: 10,
+        borderRadius: 16,
         padding: 11,
         marginBottom: 7,
       }}>

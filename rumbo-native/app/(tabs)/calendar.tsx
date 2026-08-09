@@ -79,7 +79,7 @@ export default function CalendarScreen() {
                     flex: 1,
                     aspectRatio: 1,
                     margin: 2,
-                    borderRadius: 9,
+                    borderRadius: 14,
                     alignItems: 'center',
                     justifyContent: 'center',
                     backgroundColor: isSel ? colors.brand : isToday ? colors.brandDim : colors.bgElev,
@@ -111,7 +111,7 @@ export default function CalendarScreen() {
               <Pressable
                 key={c.id}
                 onPress={() => router.push(`/board-task/${c.id}`)}
-                style={{ backgroundColor: colors.bgElev, borderColor: colors.border, borderWidth: 1, borderRadius: 10, padding: 11, marginBottom: 7 }}>
+                style={{ backgroundColor: colors.bgElev, borderColor: colors.border, borderWidth: 1, borderRadius: 16, padding: 11, marginBottom: 7 }}>
                 <Text style={{ fontWeight: '600', color: c.status === 'completed' ? colors.textFaint : colors.text, textDecorationLine: c.status === 'completed' ? 'line-through' : 'none' }}>
                   {c.title}
                 </Text>

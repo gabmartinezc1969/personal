@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useTheme } from '../theme/useTheme';
+import { FONTS } from '../theme/fonts';
 import { PersonalTask, PersonalList } from '../types/models';
 import { CheckCircle, MetaPill, IconBtn } from './ui';
 import { fmtDateHuman, fmtTime, fmtDuration, isOverdue, isDueToday, recurrenceLabel } from '../utils/dates';
@@ -38,7 +39,7 @@ export function TaskRow({
         <Text
           style={{
             fontSize: 14.5,
-            fontWeight: '600',
+            fontFamily: FONTS.bold,
             color: task.status === 'completed' ? colors.textFaint : colors.text,
             textDecorationLine: task.status === 'completed' ? 'line-through' : 'none',
           }}
@@ -76,10 +77,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 10,
-    padding: 11,
-    borderRadius: 10,
+    padding: 12,
+    borderRadius: 16,
     borderWidth: 1,
-    marginBottom: 7,
+    marginBottom: 8,
+    shadowColor: '#1b3a10',
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 1,
   },
   meta: { flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 5, alignItems: 'center' },
 });

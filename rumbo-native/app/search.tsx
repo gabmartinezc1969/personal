@@ -65,7 +65,7 @@ export default function SearchScreen() {
             gap: 8,
             borderWidth: 1,
             borderColor: colors.borderStrong,
-            borderRadius: 10,
+            borderRadius: 16,
             paddingHorizontal: 12,
             backgroundColor: colors.bgElev,
           }}>
@@ -93,7 +93,7 @@ export default function SearchScreen() {
                 alignItems: 'center',
                 gap: 10,
                 padding: 11,
-                borderRadius: 9,
+                borderRadius: 14,
                 backgroundColor: pressed ? colors.brandDim : 'transparent',
               })}>
               <Ionicons name={r.icon} size={17} color={colors.textDim} />

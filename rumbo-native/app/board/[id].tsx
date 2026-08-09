@@ -83,7 +83,7 @@ export default function BoardScreen() {
         {showSectionInput && (
           <View style={{ flexDirection: 'row', gap: 8, marginTop: 10 }}>
             <TextInput
-              style={{ flex: 1, borderWidth: 1, borderColor: colors.borderStrong, borderRadius: 9, padding: 10, color: colors.text, backgroundColor: colors.bgElev }}
+              style={{ flex: 1, borderWidth: 1, borderColor: colors.borderStrong, borderRadius: 14, padding: 10, color: colors.text, backgroundColor: colors.bgElev }}
               placeholder="Nombre de la nueva sección…"
               placeholderTextColor={colors.textFaint}
               value={sectionDraft}
@@ -118,7 +118,7 @@ export default function BoardScreen() {
                       key={c.id}
                       onPress={() => router.push(`/board-task/${c.id}`)}
                       onLongPress={() => moveCard(c.id, sec.id)}
-                      style={{ backgroundColor: colors.bgElev, borderColor: colors.border, borderWidth: 1, borderRadius: 10, padding: 10, marginBottom: 8 }}>
+                      style={{ backgroundColor: colors.bgElev, borderColor: colors.border, borderWidth: 1, borderRadius: 16, padding: 10, marginBottom: 8 }}>
                       <Text
                         style={{
                           fontWeight: '600',
@@ -199,7 +199,7 @@ export default function BoardScreen() {
             </View>
             {autoAction === 'tag' && (
               <TextInput
-                style={{ borderWidth: 1, borderColor: colors.borderStrong, borderRadius: 9, padding: 10, color: colors.text, marginBottom: 10 }}
+                style={{ borderWidth: 1, borderColor: colors.borderStrong, borderRadius: 14, padding: 10, color: colors.text, marginBottom: 10 }}
                 placeholder="Etiqueta (ej. revisado)"
                 placeholderTextColor={colors.textFaint}
                 value={autoTag}

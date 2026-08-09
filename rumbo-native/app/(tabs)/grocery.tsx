@@ -61,7 +61,7 @@ export default function GroceryScreen() {
                 backgroundColor: colors.bgElev,
                 borderColor: colors.border,
                 borderWidth: 1,
-                borderRadius: 10,
+                borderRadius: 16,
                 padding: 10,
                 marginBottom: 6,
               }}>

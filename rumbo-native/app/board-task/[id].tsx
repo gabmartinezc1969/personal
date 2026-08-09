@@ -59,7 +59,7 @@ export default function BoardTaskDetailScreen() {
   const inputStyle = {
     borderWidth: 1,
     borderColor: colors.borderStrong,
-    borderRadius: 9,
+    borderRadius: 14,
     padding: 11,
     color: colors.text,
     backgroundColor: colors.bgElev,
@@ -177,7 +177,7 @@ export default function BoardTaskDetailScreen() {
         />
 
         <SectionHeader title="Tiempo" />
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: colors.bgElev2, borderRadius: 10, padding: 12 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: colors.bgElev2, borderRadius: 16, padding: 12 }}>
           <Text style={{ fontWeight: '700', fontSize: 16, color: colors.text, fontVariant: ['tabular-nums'] }}>{fmtDuration(elapsed)}</Text>
           <Btn
             label={card.timerStartedAt ? 'Detener' : 'Iniciar'}
