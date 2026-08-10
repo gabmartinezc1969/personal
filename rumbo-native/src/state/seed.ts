@@ -26,7 +26,7 @@ export function seedData(): AppState {
   return {
     schemaVersion: 1,
     user: { name: 'Tú', createdAt: now },
-    settings: { theme: 'auto', notifyDevice: false, quietStart: '22:00', quietEnd: '08:00', weekStart: 1 },
+    settings: { theme: 'dark', notifyDevice: false, quietStart: '22:00', quietEnd: '08:00', weekStart: 1 },
     lists: [
       { id: listWork, name: 'Trabajo', color: LIST_COLORS[1], position: 1000, archived: false },
       { id: listHome, name: 'Personal', color: LIST_COLORS[0], position: 2000, archived: false },

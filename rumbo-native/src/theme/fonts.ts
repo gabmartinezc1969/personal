@@ -1,8 +1,8 @@
-// Tipografía redondeada de la dirección visual (Nunito), cargada localmente
-// vía @expo-google-fonts (sin peticiones en runtime).
+// Tipografía geométrica y técnica de la dirección "Rumbo Dark" (Inter),
+// cargada localmente vía @expo-google-fonts (sin peticiones en runtime).
 export const FONTS = {
-  semi: 'Nunito_600SemiBold',
-  bold: 'Nunito_700Bold',
-  extra: 'Nunito_800ExtraBold',
-  black: 'Nunito_900Black',
+  semi: 'Inter_600SemiBold',
+  bold: 'Inter_700Bold',
+  extra: 'Inter_800ExtraBold',
+  black: 'Inter_900Black',
 } as const;

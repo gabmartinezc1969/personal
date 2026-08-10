@@ -1,6 +1,9 @@
-// Paleta "Rumbo Play" — dirección visual gamificada extraída de la referencia:
-// verde lima vibrante como héroe, verde bosque profundo para tarjetas destacadas,
-// fondos menta claros y acentos cálidos (ámbar/naranja) para racha y XP.
+// Paleta "Rumbo Dark" — dirección visual extraída de la referencia fintech/
+// trading: negro-violeta profundo con resplandor degradado púrpura→azul,
+// tarjetas oscuras de borde sutil (sin sombra pesada), CTA en degradado
+// violeta-azul, verde menta para valores/estados positivos, tipografía
+// geométrica con números tabulares. El tema claro es un hermano coherente
+// (mismo acento) para cuando el usuario prefiera fondo claro.
 
 export type Palette = {
   bg: string;
@@ -11,82 +14,76 @@ export type Palette = {
   text: string;
   textDim: string;
   textFaint: string;
-  brand: string;      // verde lima vibrante (botones, activos)
-  brandEdge: string;  // borde inferior 3D de los botones
-  brandDim: string;   // fondo suave de marca
-  brandStrong: string;
+  brand: string; // acento violeta — iconos activos, focos, texto de marca
+  brandDim: string; // superficie sutil de marca (chip seleccionado, etc.)
+  brandStrong: string; // violeta más claro para texto sobre superficies oscuras
+  gradientFrom: string; // inicio del degradado de CTA (violeta)
+  gradientTo: string; // fin del degradado de CTA (azul)
   onBrand: string;
-  hero: string;       // verde bosque profundo (tarjetas destacadas)
-  heroText: string;
-  heroTextDim: string;
-  accent: string;     // ámbar cálido (racha, XP)
-  accentDim: string;
+  glowTop: string; // resplandor superior ambiental (solo oscuro; transparente en claro)
+  glowBottom: string;
   danger: string;
   dangerDim: string;
   warn: string;
   warnDim: string;
   info: string;
   infoDim: string;
-  ok: string;
+  ok: string; // verde menta — positivo/completado
   okDim: string;
 };
 
 export const light: Palette = {
-  bg: '#F1F8E8',
+  bg: '#F3F1FB',
   bgElev: '#FFFFFF',
-  bgElev2: '#F7FBEF',
-  border: '#E3EDD6',
-  borderStrong: '#CBDDB4',
-  text: '#243B1C',
-  textDim: '#5A7050',
-  textFaint: '#8FA284',
-  brand: '#58CC02',
-  brandEdge: '#43A106',
-  brandDim: '#E4F6D2',
-  brandStrong: '#2E7D0F',
+  bgElev2: '#F7F5FC',
+  border: '#E6E1F5',
+  borderStrong: '#D2C9EE',
+  text: '#181425',
+  textDim: '#5C5578',
+  textFaint: '#948DB0',
+  brand: '#6E4CF0',
+  brandDim: '#EBE4FE',
+  brandStrong: '#5A38D8',
+  gradientFrom: '#8B5CF6',
+  gradientTo: '#4C6FFF',
   onBrand: '#FFFFFF',
-  hero: '#123B1F',
-  heroText: '#FFFFFF',
-  heroTextDim: '#A9CDA9',
-  accent: '#F59E0B',
-  accentDim: '#FEF0D8',
-  danger: '#E5484D',
-  dangerDim: '#FDE8E8',
-  warn: '#E08600',
-  warnDim: '#FCEFD8',
-  info: '#1C9BF0',
-  infoDim: '#E1F1FD',
-  ok: '#2FA34C',
-  okDim: '#E2F5E6',
+  glowTop: 'transparent',
+  glowBottom: 'transparent',
+  danger: '#E1483F',
+  dangerDim: '#FBE7E5',
+  warn: '#C97A00',
+  warnDim: '#FBEDD6',
+  info: '#2E72E0',
+  infoDim: '#E6EFFD',
+  ok: '#13A883',
+  okDim: '#DFF6EE',
 };
 
 export const dark: Palette = {
-  bg: '#101D0F',
-  bgElev: '#182A16',
-  bgElev2: '#1E331B',
-  border: '#284024',
-  borderStrong: '#3A5734',
-  text: '#EAF5E3',
-  textDim: '#A9BFA0',
-  textFaint: '#7A9070',
-  brand: '#6FDD1D',
-  brandEdge: '#4FA80E',
-  brandDim: '#22421A',
-  brandStrong: '#8BEE45',
-  onBrand: '#0D2405',
-  hero: '#0C2A13',
-  heroText: '#F0FAEE',
-  heroTextDim: '#8FB98F',
-  accent: '#F6B23C',
-  accentDim: '#3A2C10',
-  danger: '#F2686C',
-  dangerDim: '#3D1D1E',
-  warn: '#F0A83C',
-  warnDim: '#392A10',
-  info: '#5FB8F5',
-  infoDim: '#14293A',
-  ok: '#5ECC7B',
-  okDim: '#14311D',
+  bg: '#0A0919',
+  bgElev: '#14122A',
+  bgElev2: '#1B1836',
+  border: '#292450',
+  borderStrong: '#3B3568',
+  text: '#F6F4FF',
+  textDim: '#A9A1CC',
+  textFaint: '#726A96',
+  brand: '#9A85FF',
+  brandDim: '#241F49',
+  brandStrong: '#B7A8FF',
+  gradientFrom: '#8B5CF6',
+  gradientTo: '#4C6FFF',
+  onBrand: '#FFFFFF',
+  glowTop: 'rgba(139,92,246,0.28)',
+  glowBottom: 'rgba(76,111,255,0.22)',
+  danger: '#FF6B6B',
+  dangerDim: '#3A1E27',
+  warn: '#FFB74D',
+  warnDim: '#3A2C14',
+  info: '#5FA8FF',
+  infoDim: '#182A4A',
+  ok: '#2DD9A8',
+  okDim: '#123328',
 };
 
-export const LIST_COLORS = ['#58CC02', '#1C9BF0', '#F59E0B', '#E5484D', '#9F5FE8', '#0FA3A3', '#FF7A1A', '#5A7050'];
+export const LIST_COLORS = ['#9A85FF', '#5FA8FF', '#FFB74D', '#FF6B6B', '#D57BFF', '#2DD9A8', '#FF9F4A', '#7C7599'];

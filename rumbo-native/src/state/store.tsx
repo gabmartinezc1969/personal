@@ -31,7 +31,7 @@ function migrate(raw: any): AppState {
   d.trash = d.trash || { tasks: [], boardTasks: [] };
   d.myDay = d.myDay || {};
   d.notifications = d.notifications || [];
-  d.settings = Object.assign({ theme: 'auto' as ThemeMode, notifyDevice: false, quietStart: '22:00', quietEnd: '08:00', weekStart: 1 }, d.settings || {});
+  d.settings = Object.assign({ theme: 'dark' as ThemeMode, notifyDevice: false, quietStart: '22:00', quietEnd: '08:00', weekStart: 1 }, d.settings || {});
   (d.boards || []).forEach((b) => {
     b.automations = b.automations || [];
   });
