@@ -24,17 +24,24 @@ export function DonutChart({ data, size = 220, centerLabel }: { data: Slice[]; s
   const rInner = size * 0.24;
   const total = data.reduce((a, s) => a + s.value, 0);
 
+  // SVG no puede dibujar un arco cuyo punto de inicio coincide con el de fin
+  // (caso típico: una sola categoría = 100%): el navegador lo trata como un
+  // arco degenerado y no pinta nada. Se recorta el barrido dibujado a un
+  // pelo menos de la vuelta completa (imperceptible) para evitarlo.
+  const FULL_CIRCLE_EPSILON = 0.001;
+
   let angle = -Math.PI / 2;
   const paths = total
     ? data
         .filter((s) => s.value > 0)
         .map((s, idx) => {
           const sweep = (s.value / total) * Math.PI * 2;
-          const d = slicePath(cx, cy, rOuter, rInner, angle, angle + sweep);
+          const drawnSweep = Math.min(sweep, Math.PI * 2 - FULL_CIRCLE_EPSILON);
+          const d = slicePath(cx, cy, rOuter, rInner, angle, angle + drawnSweep);
           angle += sweep;
           return <Path key={idx} d={d} fill={s.color} />;
         })
-    : [<Path key="empty" d={slicePath(cx, cy, rOuter, rInner, 0, Math.PI * 2 - 0.0001)} fill="#eee" />];
+    : [<Path key="empty" d={slicePath(cx, cy, rOuter, rInner, 0, Math.PI * 2 - FULL_CIRCLE_EPSILON)} fill="#eee" />];
 
   return (
     <View style={{ width: size, height: size }}>
