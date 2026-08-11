@@ -1,0 +1,58 @@
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
+
+type Slice = { value: number; color: string };
+
+function polar(cx: number, cy: number, r: number, angle: number) {
+  return { x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) };
+}
+
+function slicePath(cx: number, cy: number, rOuter: number, rInner: number, start: number, end: number): string {
+  const so = polar(cx, cy, rOuter, start);
+  const eo = polar(cx, cy, rOuter, end);
+  const ei = polar(cx, cy, rInner, end);
+  const si = polar(cx, cy, rInner, start);
+  const large = end - start > Math.PI ? 1 : 0;
+  return `M ${so.x} ${so.y} A ${rOuter} ${rOuter} 0 ${large} 1 ${eo.x} ${eo.y} L ${ei.x} ${ei.y} A ${rInner} ${rInner} 0 ${large} 0 ${si.x} ${si.y} Z`;
+}
+
+export function DonutChart({ data, size = 220, centerLabel }: { data: Slice[]; size?: number; centerLabel: string }) {
+  const cx = size / 2;
+  const cy = size / 2;
+  const rOuter = size * 0.39;
+  const rInner = size * 0.24;
+  const total = data.reduce((a, s) => a + s.value, 0);
+
+  let angle = -Math.PI / 2;
+  const paths = total
+    ? data
+        .filter((s) => s.value > 0)
+        .map((s, idx) => {
+          const sweep = (s.value / total) * Math.PI * 2;
+          const d = slicePath(cx, cy, rOuter, rInner, angle, angle + sweep);
+          angle += sweep;
+          return <Path key={idx} d={d} fill={s.color} />;
+        })
+    : [<Path key="empty" d={slicePath(cx, cy, rOuter, rInner, 0, Math.PI * 2 - 0.0001)} fill="#eee" />];
+
+  return (
+    <View style={{ width: size, height: size }}>
+      <Svg width={size} height={size}>
+        {paths}
+      </Svg>
+      <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
+        <View style={styles.centerWrap}>
+          <Text style={styles.centerText} numberOfLines={1} adjustsFontSizeToFit>
+            {centerLabel}
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  centerWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 30 },
+  centerText: { fontWeight: '800', fontSize: 16, color: '#171717' },
+});
