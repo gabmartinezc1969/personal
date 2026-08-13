@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { AppText as Text, AppTextInput as TextInput } from '@/src/components/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Header } from '@/src/components/Header';
@@ -77,15 +78,21 @@ export default function HomeScreen() {
               <View style={styles.periodStrip}>
                 <Pressable style={styles.periodBox} onPress={() => setMonthPickerOpen(true)}>
                   <Text style={styles.metricLabel}>Periodo</Text>
-                  <Text style={styles.periodValue}>{monthLabel}</Text>
+                  <Text style={styles.periodValue} numberOfLines={1} adjustsFontSizeToFit>
+                    {monthLabel}
+                  </Text>
                 </Pressable>
                 <View style={styles.metric}>
                   <Text style={styles.metricLabel}>Gastos</Text>
-                  <Text style={[styles.metricValue, styles.expenseColor]}>−{formatMoney(monthTotals.expense, state.currency)}</Text>
+                  <Text style={[styles.metricValue, styles.expenseColor]} numberOfLines={1} adjustsFontSizeToFit>
+                    −{formatMoney(monthTotals.expense, state.currency)}
+                  </Text>
                 </View>
                 <View style={styles.metric}>
                   <Text style={styles.metricLabel}>Ingreso</Text>
-                  <Text style={[styles.metricValue, styles.incomeColor]}>{formatMoney(monthTotals.income, state.currency)}</Text>
+                  <Text style={[styles.metricValue, styles.incomeColor]} numberOfLines={1} adjustsFontSizeToFit>
+                    {formatMoney(monthTotals.income, state.currency)}
+                  </Text>
                 </View>
               </View>
             </Card>
@@ -150,7 +157,7 @@ const styles = StyleSheet.create({
   searchRow: { flexDirection: 'row', gap: 8, marginVertical: 13 },
   search: { flex: 1, borderWidth: 1, borderColor: colors.line, backgroundColor: '#fff', borderRadius: 14, padding: 12, color: colors.ink },
   iconBtn: { borderWidth: 1, borderColor: colors.line, backgroundColor: '#fff', borderRadius: 14, minWidth: 46, alignItems: 'center', justifyContent: 'center' },
-  dayTitle: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 4, paddingTop: 10, paddingBottom: 6 },
+  dayTitle: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 2, paddingHorizontal: 4, paddingTop: 10, paddingBottom: 6 },
   dayTitleText: { fontSize: 12, color: colors.muted, fontWeight: '700' },
   txList: { backgroundColor: '#fff', borderRadius: 18, borderWidth: 1, borderColor: colors.line, overflow: 'hidden' },
 });

@@ -1,5 +1,6 @@
 import React from 'react';
-import { FlatList, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Modal, Pressable, StyleSheet, View } from 'react-native';
+import { AppText as Text } from './AppText';
 
 import { colors } from '../theme/colors';
 import { Option } from '../utils/date';

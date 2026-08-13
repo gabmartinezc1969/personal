@@ -3,7 +3,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 
 import { id } from '../utils/id';
 import { defaultState } from './seed';
-import { AppState, Budget, Category, Currency, Transaction } from './types';
+import { AppState, Budget, Category, Currency, FontScale, Transaction } from './types';
 
 const STORAGE_KEY = 'mis-gastos-pro-native-v1';
 
@@ -14,6 +14,7 @@ type Ctx = {
   deleteTransaction: (txId: string) => void;
   upsertCategory: (category: Category) => void;
   setCurrency: (currency: Currency) => void;
+  setFontScale: (scale: FontScale) => void;
   setGlobalBudget: (amount: number) => void;
   upsertCategoryBudget: (categoryId: string, amount: number) => void;
   deleteBudget: (budgetId: string) => void;
@@ -81,6 +82,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setState((prev) => ({ ...prev, currency }));
   }, []);
 
+  const setFontScale = useCallback((scale: FontScale) => {
+    setState((prev) => ({ ...prev, fontScale: scale }));
+  }, []);
+
   const setGlobalBudget = useCallback((amount: number) => {
     setState((prev) => ({ ...prev, globalBudget: amount }));
   }, []);
@@ -112,13 +117,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       deleteTransaction,
       upsertCategory,
       setCurrency,
+      setFontScale,
       setGlobalBudget,
       upsertCategoryBudget,
       deleteBudget,
       restoreState,
       resetState,
     }),
-    [state, ready, addTransaction, deleteTransaction, upsertCategory, setCurrency, setGlobalBudget, upsertCategoryBudget, deleteBudget, restoreState, resetState]
+    [state, ready, addTransaction, deleteTransaction, upsertCategory, setCurrency, setFontScale, setGlobalBudget, upsertCategoryBudget, deleteBudget, restoreState, resetState]
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { AppText as Text } from '@/src/components/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Header } from '@/src/components/Header';
@@ -8,7 +9,7 @@ import { OptionPickerModal } from '@/src/components/OptionPickerModal';
 import { Card } from '@/src/components/ui';
 import { useStore } from '@/src/state/store';
 import { useToast } from '@/src/state/toast';
-import { AppState, Currency } from '@/src/state/types';
+import { AppState, Currency, FontScale } from '@/src/state/types';
 import { colors } from '@/src/theme/colors';
 import { shareTextFile, pickJsonFile } from '@/src/utils/files';
 
@@ -18,8 +19,15 @@ const CURRENCIES: { value: Currency; label: string }[] = [
   { value: 'EUR', label: 'EUR' },
 ];
 
+const FONT_SCALES: { value: FontScale; label: string; preview: number }[] = [
+  { value: 0.9, label: 'Pequeña', preview: 13 },
+  { value: 1, label: 'Mediana', preview: 15 },
+  { value: 1.15, label: 'Grande', preview: 17 },
+  { value: 1.3, label: 'Muy grande', preview: 19 },
+];
+
 export default function ProfileScreen() {
-  const { state, setCurrency, restoreState, resetState } = useStore();
+  const { state, setCurrency, setFontScale, restoreState, resetState } = useStore();
   const toast = useToast();
   const [currencyPickerOpen, setCurrencyPickerOpen] = useState(false);
 
@@ -69,6 +77,20 @@ export default function ProfileScreen() {
               <Text style={styles.currencyBtnText}>{state.currency}</Text>
             </Pressable>
           </Row>
+          <Row last>
+            <RowText title="Tamaño de letra" subtitle="Ajusta el texto de toda la app a tu gusto" />
+          </Row>
+          <View style={styles.fontScaleRow}>
+            {FONT_SCALES.map((opt) => {
+              const selected = state.fontScale === opt.value;
+              return (
+                <Pressable key={opt.value} style={[styles.fontScaleBtn, selected && styles.fontScaleBtnSelected]} onPress={() => setFontScale(opt.value)}>
+                  <Text style={[styles.fontScaleLetter, { fontSize: opt.preview }, selected && styles.fontScaleLetterSelected]}>A</Text>
+                  <Text style={[styles.fontScaleCaption, selected && styles.fontScaleCaptionSelected]}>{opt.label}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
           <Row>
             <RowText title="Plantilla de categorías" subtitle="Personaliza nombres, iconos y colores" />
             <PillBtn label="Editar" onPress={() => router.push('/categories')} />
@@ -133,4 +155,11 @@ const styles = StyleSheet.create({
   pillDanger: { backgroundColor: '#FCEBEB' },
   pillText: { fontWeight: '800', color: colors.ink },
   pillTextDanger: { color: colors.danger },
+  fontScaleRow: { flexDirection: 'row', gap: 8, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.line },
+  fontScaleBtn: { flex: 1, alignItems: 'center', paddingVertical: 10, borderRadius: 13, backgroundColor: '#F2F3F5', borderWidth: 2, borderColor: 'transparent' },
+  fontScaleBtnSelected: { backgroundColor: colors.categorySelectedBg, borderColor: colors.categorySelectedBorder },
+  fontScaleLetter: { fontWeight: '800', color: colors.ink },
+  fontScaleLetterSelected: { color: colors.ink },
+  fontScaleCaption: { fontSize: 10, color: colors.muted, marginTop: 4 },
+  fontScaleCaptionSelected: { color: colors.ink, fontWeight: '700' },
 });

@@ -63,4 +63,5 @@ export const defaultState: AppState = {
   transactions: [],
   globalBudget: 5000,
   budgets: [],
+  fontScale: 1,
 };

@@ -26,10 +26,14 @@ export type Budget = {
 
 export type Currency = 'MXN' | 'USD' | 'EUR';
 
+// Multiplicador aplicado a los `fontSize` de la app (ver src/components/AppText.tsx).
+export type FontScale = 0.9 | 1 | 1.15 | 1.3;
+
 export type AppState = {
   currency: Currency;
   categories: Category[];
   transactions: Transaction[];
   globalBudget: number;
   budgets: Budget[];
+  fontScale: FontScale;
 };
