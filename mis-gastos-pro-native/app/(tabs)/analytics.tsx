@@ -67,7 +67,7 @@ export default function AnalyticsScreen() {
 
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.periodTabs} contentContainerStyle={{ paddingHorizontal: 16 }}>
               {periods.map((p) => (
-                <Pressable key={p.value} onPress={() => setPeriod(p.value)} style={styles.periodTab}>
+                <Pressable key={p.value} onPress={() => setPeriod(p.value)} style={[styles.periodTab, p.value === period && styles.periodTabActive]}>
                   <Text style={[styles.periodTabText, p.value === period && styles.periodTabTextActive]}>{p.label}</Text>
                 </Pressable>
               ))}
@@ -91,27 +91,26 @@ export default function AnalyticsScreen() {
                 )}
               </View>
             </View>
-
-            <View style={styles.rankingHead}>
-              <Text style={styles.rankingTitle}>Ranking de categorías</Text>
-            </View>
           </Card>
         }
-        renderItem={({ item }) => {
+        renderItem={({ item, index }) => {
           const pct = total ? (item.value / total) * 100 : 0;
           return (
-            <View style={styles.rank}>
-              <CategoryBubble icon={item.category.icon} color={item.category.color} size={44} />
-              <View style={{ flex: 1 }}>
-                <Text style={styles.rankName}>
-                  {item.category.name}   {pct.toFixed(1)}%
-                </Text>
-                <View style={styles.rankBar}>
-                  <View style={[styles.rankFill, { width: `${pct}%` }]} />
+            <>
+              {index === 0 ? <Text style={styles.rankingTitle}>Ranking de categorías</Text> : null}
+              <View style={styles.rank}>
+                <CategoryBubble icon={item.category.icon} color={item.category.color} size={44} />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.rankName}>
+                    {item.category.name}   {pct.toFixed(1)}%
+                  </Text>
+                  <View style={styles.rankBar}>
+                    <View style={[styles.rankFill, { width: `${pct}%` }]} />
+                  </View>
                 </View>
+                <Text style={styles.rankValue}>{formatMoney(item.value, state.currency)}</Text>
               </View>
-              <Text style={styles.rankValue}>{formatMoney(item.value, state.currency)}</Text>
-            </View>
+            </>
           );
         }}
       />
@@ -130,7 +129,8 @@ const styles = StyleSheet.create({
   segmentText: { fontWeight: '800', color: colors.ink },
   segmentTextActive: { color: '#fff' },
   periodTabs: { borderBottomWidth: 1, borderBottomColor: colors.line },
-  periodTab: { paddingVertical: 12, paddingHorizontal: 14 },
+  periodTab: { paddingVertical: 12, paddingHorizontal: 14, borderBottomWidth: 3, borderBottomColor: 'transparent' },
+  periodTabActive: { borderBottomColor: colors.brand },
   periodTabText: { color: colors.muted },
   periodTabTextActive: { color: colors.ink, fontWeight: '800' },
   analyticsGrid: { padding: 15, gap: 16, alignItems: 'center' },
@@ -139,9 +139,8 @@ const styles = StyleSheet.create({
   dot: { width: 10, height: 10, borderRadius: 5 },
   legendName: { flex: 1, fontSize: 13, color: colors.ink },
   legendPct: { fontSize: 13, fontWeight: '700', color: colors.ink },
-  rankingHead: { paddingHorizontal: 15, paddingBottom: 4 },
-  rankingTitle: { fontSize: 13, fontWeight: '800', color: colors.muted },
-  rank: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 15, paddingVertical: 11, borderBottomWidth: 1, borderBottomColor: colors.line, backgroundColor: colors.card },
+  rankingTitle: { fontSize: 16, fontWeight: '800', color: colors.ink, marginTop: 8, marginBottom: 10, marginHorizontal: 4 },
+  rank: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: 18, backgroundColor: colors.card, marginBottom: 8 },
   rankName: { fontWeight: '700', color: colors.ink },
   rankBar: { height: 7, backgroundColor: '#eee', borderRadius: 10, marginTop: 6, overflow: 'hidden' },
   rankFill: { height: '100%', backgroundColor: colors.brand, borderRadius: 10 },

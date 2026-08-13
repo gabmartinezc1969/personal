@@ -5,7 +5,14 @@ import { AppText as Text } from './AppText';
 import { colors } from '../theme/colors';
 
 export function Card({ children, style }: { children: React.ReactNode; style?: ViewStyle }) {
-  return <View style={[styles.card, style]}>{children}</View>;
+  // Dos capas: la exterior sólo lleva la sombra (sin overflow:hidden, que
+  // en iOS recorta la sombra junto con el contenido); `style` se aplica a
+  // la interior, que es la que tenía el fondo/padding hasta ahora.
+  return (
+    <View style={styles.cardShadow}>
+      <View style={[styles.card, style]}>{children}</View>
+    </View>
+  );
 }
 
 export function Pill({ label, onPress }: { label: string; onPress?: () => void }) {
@@ -51,13 +58,19 @@ export function SectionHead({ title, action, onAction }: { title: string; action
 }
 
 const styles = StyleSheet.create({
+  cardShadow: {
+    borderRadius: 24,
+    marginBottom: 14,
+    shadowColor: '#12162B',
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 2,
+  },
   card: {
     backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.line,
-    borderRadius: 22,
+    borderRadius: 24,
     overflow: 'hidden',
-    marginBottom: 14,
   },
   pill: {
     backgroundColor: '#F2F3F5',
