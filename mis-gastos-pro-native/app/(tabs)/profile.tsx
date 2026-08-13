@@ -1,11 +1,10 @@
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import React from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { AppText as Text } from '@/src/components/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Header } from '@/src/components/Header';
-import { OptionPickerModal } from '@/src/components/OptionPickerModal';
 import { Card } from '@/src/components/ui';
 import { useStore } from '@/src/state/store';
 import { useToast } from '@/src/state/toast';
@@ -29,7 +28,6 @@ const FONT_SCALES: { value: FontScale; label: string; preview: number }[] = [
 export default function ProfileScreen() {
   const { state, setCurrency, setFontScale, restoreState, resetState } = useStore();
   const toast = useToast();
-  const [currencyPickerOpen, setCurrencyPickerOpen] = useState(false);
 
   async function backup() {
     try {
@@ -70,13 +68,32 @@ export default function ProfileScreen() {
     <SafeAreaView style={styles.screen} edges={['top']}>
       <Header title="Yo" />
       <ScrollView contentContainerStyle={styles.content}>
+        <View style={styles.profileHead}>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>👤</Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.profileName}>Mi cuenta</Text>
+            <Text style={styles.profileSub}>Todo se guarda solo en este dispositivo</Text>
+          </View>
+        </View>
+
+        <Text style={styles.sectionLabel}>Preferencias</Text>
         <Card style={{ paddingHorizontal: 16 }}>
           <Row>
             <RowText title="Moneda" />
-            <Pressable style={styles.currencyBtn} onPress={() => setCurrencyPickerOpen(true)}>
-              <Text style={styles.currencyBtnText}>{state.currency}</Text>
-            </Pressable>
           </Row>
+          <View style={styles.segmentGroup}>
+            {CURRENCIES.map((c) => {
+              const selected = state.currency === c.value;
+              return (
+                <Pressable key={c.value} style={[styles.segmentBtn, selected && styles.segmentBtnSelected]} onPress={() => setCurrency(c.value)}>
+                  <Text style={[styles.segmentBtnText, selected && styles.segmentBtnTextSelected]}>{c.label}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+
           <Row last>
             <RowText title="Tamaño de letra" subtitle="Ajusta el texto de toda la app a tu gusto" />
           </Row>
@@ -91,6 +108,10 @@ export default function ProfileScreen() {
               );
             })}
           </View>
+        </Card>
+
+        <Text style={styles.sectionLabel}>Tus datos</Text>
+        <Card style={{ paddingHorizontal: 16 }}>
           <Row>
             <RowText title="Plantilla de categorías" subtitle="Personaliza nombres, iconos y colores" />
             <PillBtn label="Editar" onPress={() => router.push('/categories')} />
@@ -99,25 +120,20 @@ export default function ProfileScreen() {
             <RowText title="Respaldo JSON" subtitle="Guarda todos tus movimientos" />
             <PillBtn label="Descargar" onPress={backup} />
           </Row>
-          <Row>
+          <Row last>
             <RowText title="Restaurar respaldo" subtitle="Importa un archivo previamente generado" />
             <PillBtn label="Importar" onPress={restore} />
           </Row>
+        </Card>
+
+        <Text style={styles.sectionLabel}>Zona de peligro</Text>
+        <Card style={{ paddingHorizontal: 16 }}>
           <Row last>
             <RowText title="Reiniciar aplicación" subtitle="Elimina los datos almacenados" />
             <PillBtn label="Borrar" danger onPress={reset} />
           </Row>
         </Card>
       </ScrollView>
-
-      <OptionPickerModal
-        visible={currencyPickerOpen}
-        title="Moneda"
-        options={CURRENCIES}
-        selected={state.currency}
-        onSelect={(v) => setCurrency(v as Currency)}
-        onClose={() => setCurrencyPickerOpen(false)}
-      />
     </SafeAreaView>
   );
 }
@@ -145,17 +161,26 @@ function PillBtn({ label, onPress, danger }: { label: string; onPress: () => voi
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
-  content: { padding: 14, paddingBottom: 24 },
+  content: { padding: 16, paddingBottom: 24 },
+  profileHead: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 4, marginBottom: 20 },
+  avatar: { width: 56, height: 56, borderRadius: 28, backgroundColor: colors.brandTint, alignItems: 'center', justifyContent: 'center' },
+  avatarText: { fontSize: 26 },
+  profileName: { fontSize: 18, fontWeight: '800', color: colors.ink },
+  profileSub: { fontSize: 12, color: colors.muted, marginTop: 2 },
+  sectionLabel: { fontSize: 13, fontWeight: '800', color: colors.muted, marginBottom: 8, marginLeft: 4, textTransform: 'uppercase', letterSpacing: 0.4 },
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: colors.line },
   rowTitle: { fontWeight: '700', color: colors.ink, fontSize: 15 },
   rowSubtitle: { fontSize: 12, color: colors.muted, marginTop: 2 },
-  currencyBtn: { backgroundColor: '#F2F3F5', borderRadius: 999, paddingVertical: 8, paddingHorizontal: 14 },
-  currencyBtnText: { fontWeight: '800', color: colors.ink },
   pill: { backgroundColor: '#F2F3F5', borderRadius: 999, paddingVertical: 8, paddingHorizontal: 14 },
   pillDanger: { backgroundColor: '#FCEBEB' },
   pillText: { fontWeight: '800', color: colors.ink },
   pillTextDanger: { color: colors.danger },
-  fontScaleRow: { flexDirection: 'row', gap: 8, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.line },
+  segmentGroup: { flexDirection: 'row', gap: 8, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.line },
+  segmentBtn: { flex: 1, alignItems: 'center', paddingVertical: 10, borderRadius: 13, backgroundColor: '#F2F3F5' },
+  segmentBtnSelected: { backgroundColor: colors.brand },
+  segmentBtnText: { fontWeight: '800', color: colors.ink },
+  segmentBtnTextSelected: { color: colors.onBrand },
+  fontScaleRow: { flexDirection: 'row', gap: 8, paddingVertical: 12 },
   fontScaleBtn: { flex: 1, alignItems: 'center', paddingVertical: 10, borderRadius: 13, backgroundColor: '#F2F3F5', borderWidth: 2, borderColor: 'transparent' },
   fontScaleBtnSelected: { backgroundColor: colors.categorySelectedBg, borderColor: colors.categorySelectedBorder },
   fontScaleLetter: { fontWeight: '800', color: colors.ink },
