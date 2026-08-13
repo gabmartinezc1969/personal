@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BudgetModal } from '@/src/components/BudgetModal';
 import { Header } from '@/src/components/Header';
 import { RingProgress } from '@/src/components/RingProgress';
-import { Card, EmptyState, SectionHead } from '@/src/components/ui';
+import { EmptyState, SectionHead } from '@/src/components/ui';
 import { categoryById, totals, transactionsForMonth, useStore } from '@/src/state/store';
 import { useToast } from '@/src/state/toast';
 import { Budget } from '@/src/state/types';
@@ -42,19 +42,35 @@ export default function ReportsScreen() {
         data={state.budgets}
         keyExtractor={(b) => b.id}
         ListHeaderComponent={
-          <Card>
-            <SectionHead title="Presupuesto mensual" action="⚙ Ajustar" onAction={() => setBudgetModal({ open: true, type: 'global' })} />
-            <View style={styles.summary}>
-              <RingProgress percent={pct} label="Disponible" value={`${Math.round(pct)}%`} />
-              <View style={styles.stats}>
-                <StatRow label="Balance:" value={formatMoney(remaining, state.currency)} />
-                <StatRow label="Presupuesto:" value={formatMoney(limit, state.currency)} />
-                <StatRow label="Gastos:" value={formatMoney(spend, state.currency)} />
+          <>
+            <View style={styles.hero}>
+              <View style={styles.heroTop}>
+                <Text style={styles.heroTitle}>Presupuesto mensual</Text>
+                <Pressable style={styles.adjustPill} onPress={() => setBudgetModal({ open: true, type: 'global' })}>
+                  <Text style={styles.adjustPillText}>⚙ Ajustar</Text>
+                </Pressable>
+              </View>
+              <View style={styles.summary}>
+                <RingProgress
+                  percent={pct}
+                  label="Disponible"
+                  value={`${Math.round(pct)}%`}
+                  trackColor="rgba(255,255,255,0.22)"
+                  progressColor={colors.onBrand}
+                  labelColor={colors.heroLabel}
+                  valueColor={colors.onBrand}
+                />
+                <View style={styles.stats}>
+                  <StatRow label="Balance" value={formatMoney(remaining, state.currency)} />
+                  <StatRow label="Presupuesto" value={formatMoney(limit, state.currency)} />
+                  <StatRow label="Gastos" value={formatMoney(spend, state.currency)} />
+                </View>
               </View>
             </View>
+
             <SectionHead title="Por categoría" action="+ Añadir" onAction={() => setBudgetModal({ open: true, type: 'category' })} />
             {state.budgets.length === 0 ? <EmptyState title="Sin presupuestos por categoría" subtitle="Añade límites para controlar tus gastos." /> : null}
-          </Card>
+          </>
         }
         renderItem={({ item }) => (
           <BudgetRow
@@ -82,7 +98,9 @@ function StatRow({ label, value }: { label: string; value: string }) {
   return (
     <View style={styles.statRow}>
       <Text style={styles.statLabel}>{label}</Text>
-      <Text style={styles.statValue}>{value}</Text>
+      <Text style={styles.statValue} numberOfLines={1} adjustsFontSizeToFit>
+        {value}
+      </Text>
     </View>
   );
 }
@@ -134,18 +152,33 @@ function BudgetRow({
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
-  content: { padding: 14, paddingBottom: 24 },
-  summary: { flexDirection: 'row', alignItems: 'center', gap: 16, padding: 16 },
-  stats: { flex: 1, gap: 7 },
-  statRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  statLabel: { color: colors.muted, fontSize: 13 },
-  statValue: { fontWeight: '800', color: colors.ink },
-  budgetRow: { marginHorizontal: 16, marginVertical: 8, backgroundColor: colors.card, padding: 12, borderRadius: 16, borderWidth: 1, borderColor: colors.line },
+  content: { padding: 16, paddingBottom: 24 },
+  hero: {
+    backgroundColor: colors.brand,
+    borderRadius: 28,
+    padding: 20,
+    marginBottom: 16,
+    shadowColor: colors.brand,
+    shadowOpacity: 0.28,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 3,
+  },
+  heroTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 },
+  heroTitle: { fontSize: 17, fontWeight: '800', color: colors.onBrand },
+  adjustPill: { backgroundColor: 'rgba(255,255,255,0.16)', borderRadius: 999, paddingVertical: 7, paddingHorizontal: 12 },
+  adjustPillText: { color: colors.onBrand, fontWeight: '700', fontSize: 12 },
+  summary: { flexDirection: 'row', alignItems: 'center', gap: 18 },
+  stats: { flex: 1, gap: 10, minWidth: 0 },
+  statRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 8 },
+  statLabel: { color: colors.heroLabel, fontSize: 13 },
+  statValue: { fontWeight: '800', color: colors.onBrand, flexShrink: 1, textAlign: 'right' },
+  budgetRow: { backgroundColor: colors.card, padding: 14, borderRadius: 18, marginBottom: 8 },
   budgetTop: { flexDirection: 'row', justifyContent: 'space-between', gap: 12, alignItems: 'flex-start' },
   budgetName: { fontWeight: '700', color: colors.ink },
   budgetSub: { color: colors.muted, fontSize: 12, marginTop: 2 },
   budgetPct: { fontWeight: '800', color: colors.ink },
-  delete: { color: '#aaa', fontSize: 20, paddingHorizontal: 2 },
-  progress: { height: 9, backgroundColor: '#eee', borderRadius: 12, overflow: 'hidden', marginTop: 7 },
+  delete: { color: '#c3c6d1', fontSize: 20, paddingHorizontal: 2 },
+  progress: { height: 9, backgroundColor: '#eee', borderRadius: 12, overflow: 'hidden', marginTop: 9 },
   progressFill: { height: '100%', borderRadius: 12 },
 });

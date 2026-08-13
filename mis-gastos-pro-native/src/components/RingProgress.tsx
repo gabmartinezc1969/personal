@@ -5,7 +5,25 @@ import Svg, { Circle } from 'react-native-svg';
 
 import { colors } from '../theme/colors';
 
-export function RingProgress({ percent, label, value, size = 112 }: { percent: number; label: string; value: string; size?: number }) {
+export function RingProgress({
+  percent,
+  label,
+  value,
+  size = 112,
+  trackColor = '#eee',
+  progressColor = colors.brand,
+  labelColor = colors.ink,
+  valueColor = colors.ink,
+}: {
+  percent: number;
+  label: string;
+  value: string;
+  size?: number;
+  trackColor?: string;
+  progressColor?: string;
+  labelColor?: string;
+  valueColor?: string;
+}) {
   const stroke = 17;
   const r = (size - stroke) / 2;
   const cx = size / 2;
@@ -17,12 +35,12 @@ export function RingProgress({ percent, label, value, size = 112 }: { percent: n
   return (
     <View style={{ width: size, height: size }}>
       <Svg width={size} height={size}>
-        <Circle cx={cx} cy={cy} r={r} stroke="#eee" strokeWidth={stroke} fill="none" />
+        <Circle cx={cx} cy={cy} r={r} stroke={trackColor} strokeWidth={stroke} fill="none" />
         <Circle
           cx={cx}
           cy={cy}
           r={r}
-          stroke={colors.brand}
+          stroke={progressColor}
           strokeWidth={stroke}
           fill="none"
           strokeDasharray={`${dash} ${circumference}`}
@@ -32,8 +50,8 @@ export function RingProgress({ percent, label, value, size = 112 }: { percent: n
         />
       </Svg>
       <View style={[StyleSheet.absoluteFillObject, styles.center]} pointerEvents="none">
-        <Text style={styles.label}>{label}</Text>
-        <Text style={styles.value} numberOfLines={1} adjustsFontSizeToFit>
+        <Text style={[styles.label, { color: labelColor }]}>{label}</Text>
+        <Text style={[styles.value, { color: valueColor }]} numberOfLines={1} adjustsFontSizeToFit>
           {value}
         </Text>
       </View>
@@ -43,6 +61,6 @@ export function RingProgress({ percent, label, value, size = 112 }: { percent: n
 
 const styles = StyleSheet.create({
   center: { alignItems: 'center', justifyContent: 'center', paddingHorizontal: 10 },
-  label: { fontSize: 12, color: colors.ink },
-  value: { fontSize: 18, fontWeight: '800', color: colors.ink, marginTop: 2 },
+  label: { fontSize: 12 },
+  value: { fontSize: 18, fontWeight: '800', marginTop: 2 },
 });
