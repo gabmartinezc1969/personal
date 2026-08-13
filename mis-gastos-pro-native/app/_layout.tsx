@@ -7,6 +7,7 @@ import { StoreProvider } from '@/src/state/store';
 import { ToastProvider } from '@/src/state/toast';
 import { UIProvider } from '@/src/state/ui';
 import { colors } from '@/src/theme/colors';
+import '@/src/theme/textDefaults';
 
 export { ErrorBoundary } from 'expo-router';
 
