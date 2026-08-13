@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Mis Gastos Pro",
-    "slug": "mis-gastos-pro",
+    "slug": "mis-gastos-pro-native",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
