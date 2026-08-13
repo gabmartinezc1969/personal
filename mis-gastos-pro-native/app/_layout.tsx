@@ -19,9 +19,9 @@ const navTheme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    primary: colors.yellow2,
+    primary: colors.brand,
     background: colors.bg,
-    card: colors.yellow,
+    card: colors.card,
     text: colors.ink,
     border: colors.line,
     notification: colors.danger,
@@ -38,7 +38,7 @@ export default function RootLayout() {
             <Stack
               screenOptions={{
                 headerTintColor: colors.ink,
-                headerStyle: { backgroundColor: colors.yellow },
+                headerStyle: { backgroundColor: colors.card },
                 headerShadowVisible: false,
                 headerTitleStyle: { fontWeight: '800' },
               }}>

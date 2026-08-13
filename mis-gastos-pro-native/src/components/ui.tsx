@@ -69,11 +69,11 @@ const styles = StyleSheet.create({
   primary: {
     width: '100%',
     borderRadius: 14,
-    backgroundColor: colors.yellow,
+    backgroundColor: colors.brand,
     paddingVertical: 13,
     alignItems: 'center',
   },
-  primaryText: { fontWeight: '900', color: colors.ink, fontSize: 15 },
+  primaryText: { fontWeight: '900', color: colors.onBrand, fontSize: 15 },
   textBtn: { fontWeight: '800', color: colors.ink, fontSize: 15 },
   empty: { padding: 30, paddingHorizontal: 18, alignItems: 'center' },
   emptyTitle: { fontWeight: '800', color: colors.ink, marginBottom: 5, fontSize: 15 },

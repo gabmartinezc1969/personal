@@ -79,10 +79,10 @@ const styles = StyleSheet.create({
     left: 16,
     right: 16,
     bottom: 20,
-    backgroundColor: colors.yellow,
+    backgroundColor: colors.brand,
     borderRadius: 14,
     paddingVertical: 14,
     alignItems: 'center',
   },
-  addBtnText: { fontWeight: '900', color: colors.ink },
+  addBtnText: { fontWeight: '900', color: colors.onBrand },
 });

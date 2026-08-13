@@ -10,7 +10,7 @@ import { CategoryBubble } from './CategoryBubble';
 export function TransactionRow({ tx, category, currency, onDelete }: { tx: Transaction; category: Category; currency: Currency; onDelete: () => void }) {
   return (
     <View style={styles.row}>
-      <CategoryBubble icon={category.icon} color={category.color} />
+      <CategoryBubble icon={category.icon} color={category.color} size={46} />
       <View style={styles.info}>
         <Text style={styles.name} numberOfLines={1}>
           {category.name}
@@ -31,12 +31,12 @@ export function TransactionRow({ tx, category, currency, onDelete }: { tx: Trans
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', gap: 11, padding: 12, borderBottomWidth: 1, borderBottomColor: '#f0f1f2' },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.card, borderRadius: 18, padding: 12, marginBottom: 8 },
   info: { flex: 1, minWidth: 0 },
   name: { fontWeight: '700', color: colors.ink },
   sub: { color: colors.muted, fontSize: 12, marginTop: 1 },
   amount: { fontWeight: '800', fontVariant: ['tabular-nums'] },
   expense: { color: colors.expenseText },
   income: { color: colors.incomeText },
-  delete: { color: '#aaa', fontSize: 20, paddingHorizontal: 4 },
+  delete: { color: '#c3c6d1', fontSize: 20, paddingHorizontal: 4 },
 });

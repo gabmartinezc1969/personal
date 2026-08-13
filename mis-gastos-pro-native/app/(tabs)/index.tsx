@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Header } from '@/src/components/Header';
 import { OptionPickerModal } from '@/src/components/OptionPickerModal';
-import { Card, EmptyState } from '@/src/components/ui';
+import { EmptyState } from '@/src/components/ui';
 import { TransactionRow } from '@/src/components/TransactionRow';
 import { categoryById, totals, transactionsForMonth, useStore } from '@/src/state/store';
 import { useToast } from '@/src/state/toast';
@@ -30,6 +30,7 @@ export default function HomeScreen() {
 
   const monthList = useMemo(() => transactionsForMonth(state, monthKey), [state, monthKey]);
   const monthTotals = useMemo(() => totals(monthList), [monthList]);
+  const balance = monthTotals.income - monthTotals.expense;
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -73,32 +74,45 @@ export default function HomeScreen() {
         keyExtractor={(g) => g.date}
         ListHeaderComponent={
           <>
-            <Card style={styles.hero}>
-              <Text style={styles.heroTitle}>Administrador de dinero</Text>
-              <View style={styles.periodStrip}>
-                <Pressable style={styles.periodBox} onPress={() => setMonthPickerOpen(true)}>
-                  <Text style={styles.metricLabel}>Periodo</Text>
-                  <Text style={styles.periodValue} numberOfLines={1} adjustsFontSizeToFit>
-                    {monthLabel}
-                  </Text>
-                </Pressable>
-                <View style={styles.metric}>
-                  <Text style={styles.metricLabel}>Gastos</Text>
-                  <Text style={[styles.metricValue, styles.expenseColor]} numberOfLines={1} adjustsFontSizeToFit>
-                    −{formatMoney(monthTotals.expense, state.currency)}
-                  </Text>
+            <View style={styles.hero}>
+              <Pressable style={styles.periodPill} onPress={() => setMonthPickerOpen(true)}>
+                <Text style={styles.periodPillText}>{monthLabel}</Text>
+                <Text style={styles.periodPillChevron}>⌄</Text>
+              </Pressable>
+
+              <Text style={styles.balanceLabel}>Balance del mes</Text>
+              <Text style={styles.balanceValue} numberOfLines={1} adjustsFontSizeToFit>
+                {formatMoney(balance, state.currency)}
+              </Text>
+
+              <View style={styles.statRow}>
+                <View style={styles.statPill}>
+                  <View style={[styles.statIconWrap, styles.statIconExpense]}>
+                    <Text style={styles.statIcon}>↙</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.statLabel}>Gastos</Text>
+                    <Text style={styles.statValue} numberOfLines={1} adjustsFontSizeToFit>
+                      −{formatMoney(monthTotals.expense, state.currency)}
+                    </Text>
+                  </View>
                 </View>
-                <View style={styles.metric}>
-                  <Text style={styles.metricLabel}>Ingreso</Text>
-                  <Text style={[styles.metricValue, styles.incomeColor]} numberOfLines={1} adjustsFontSizeToFit>
-                    {formatMoney(monthTotals.income, state.currency)}
-                  </Text>
+                <View style={styles.statPill}>
+                  <View style={[styles.statIconWrap, styles.statIconIncome]}>
+                    <Text style={styles.statIcon}>↗</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.statLabel}>Ingreso</Text>
+                    <Text style={styles.statValue} numberOfLines={1} adjustsFontSizeToFit>
+                      {formatMoney(monthTotals.income, state.currency)}
+                    </Text>
+                  </View>
                 </View>
               </View>
-            </Card>
+            </View>
 
             <View style={styles.searchRow}>
-              <TextInput style={styles.search} placeholder="Buscar por categoría, nota o cuenta" value={search} onChangeText={setSearch} />
+              <TextInput style={styles.search} placeholder="Buscar por categoría, nota o cuenta" value={search} onChangeText={setSearch} placeholderTextColor={colors.muted} />
               <Pressable style={styles.iconBtn} onPress={exportCsv}>
                 <Text style={{ fontSize: 16 }}>⇩</Text>
               </Pressable>
@@ -110,14 +124,14 @@ export default function HomeScreen() {
         renderItem={({ item }) => {
           const dayTotals = totals(item.items);
           return (
-            <View style={{ marginBottom: 4 }}>
+            <View style={styles.dayGroup}>
               <View style={styles.dayTitle}>
                 <Text style={styles.dayTitleText}>{dayLabel(item.date)}</Text>
-                <Text style={styles.dayTitleText}>
-                  Gastos: −{formatMoney(dayTotals.expense, state.currency)}  Ingreso: {formatMoney(dayTotals.income, state.currency)}
+                <Text style={styles.dayTitleTotals}>
+                  −{formatMoney(dayTotals.expense, state.currency)} · +{formatMoney(dayTotals.income, state.currency)}
                 </Text>
               </View>
-              <View style={styles.txList}>
+              <View>
                 {item.items.map((t) => (
                   <TransactionRow
                     key={t.id}
@@ -143,21 +157,55 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
-  content: { padding: 14, paddingBottom: 24 },
-  hero: { backgroundColor: colors.yellow, padding: 18, borderWidth: 0 },
-  heroTitle: { textAlign: 'center', fontWeight: '900', fontSize: 19, marginBottom: 14, color: colors.ink },
-  periodStrip: { flexDirection: 'row', alignItems: 'flex-end', gap: 10 },
-  periodBox: { width: 118 },
-  periodValue: { fontSize: 22, fontWeight: '900', color: colors.ink },
-  metric: { flex: 1, alignItems: 'center' },
-  metricLabel: { color: colors.heroLabel, fontSize: 12, marginBottom: 4 },
-  metricValue: { fontSize: 20, fontWeight: '700', fontVariant: ['tabular-nums'] },
-  expenseColor: { color: '#A91F2C' },
-  incomeColor: { color: '#087B40' },
-  searchRow: { flexDirection: 'row', gap: 8, marginVertical: 13 },
+  content: { padding: 16, paddingBottom: 24 },
+  hero: {
+    backgroundColor: colors.brand,
+    borderRadius: 28,
+    padding: 22,
+    marginBottom: 16,
+    shadowColor: colors.brand,
+    shadowOpacity: 0.28,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 3,
+  },
+  periodPill: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(255,255,255,0.16)',
+    borderRadius: 999,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    marginBottom: 16,
+  },
+  periodPillText: { color: colors.onBrand, fontWeight: '700', fontSize: 13 },
+  periodPillChevron: { color: colors.onBrand, fontSize: 13 },
+  balanceLabel: { color: colors.heroLabel, fontSize: 13, fontWeight: '600', marginBottom: 4 },
+  balanceValue: { color: colors.onBrand, fontSize: 34, fontWeight: '900', marginBottom: 18 },
+  statRow: { flexDirection: 'row', gap: 10 },
+  statPill: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: 'rgba(255,255,255,0.14)',
+    borderRadius: 16,
+    padding: 10,
+    minWidth: 0,
+  },
+  statIconWrap: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  statIconExpense: { backgroundColor: 'rgba(224,60,68,0.55)' },
+  statIconIncome: { backgroundColor: 'rgba(18,183,106,0.55)' },
+  statIcon: { color: colors.onBrand, fontSize: 13, fontWeight: '900' },
+  statLabel: { color: colors.heroLabel, fontSize: 11, fontWeight: '600' },
+  statValue: { color: colors.onBrand, fontSize: 14, fontWeight: '800' },
+  searchRow: { flexDirection: 'row', gap: 8, marginBottom: 8 },
   search: { flex: 1, borderWidth: 1, borderColor: colors.line, backgroundColor: '#fff', borderRadius: 14, padding: 12, color: colors.ink },
   iconBtn: { borderWidth: 1, borderColor: colors.line, backgroundColor: '#fff', borderRadius: 14, minWidth: 46, alignItems: 'center', justifyContent: 'center' },
-  dayTitle: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 2, paddingHorizontal: 4, paddingTop: 10, paddingBottom: 6 },
-  dayTitleText: { fontSize: 12, color: colors.muted, fontWeight: '700' },
-  txList: { backgroundColor: '#fff', borderRadius: 18, borderWidth: 1, borderColor: colors.line, overflow: 'hidden' },
+  dayGroup: { marginTop: 18 },
+  dayTitle: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 2, paddingHorizontal: 4, paddingBottom: 8 },
+  dayTitleText: { fontSize: 13, color: colors.ink, fontWeight: '800' },
+  dayTitleTotals: { fontSize: 12, color: colors.muted, fontWeight: '600' },
 });

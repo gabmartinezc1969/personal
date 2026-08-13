@@ -1,19 +1,22 @@
-// Misma paleta amarilla de la versión web (mis-gastos-pro.html). La app es
-// de tema claro fijo, igual que el original.
+// Paleta azul tipo fintech (dirección visual tomada de la referencia
+// Monifi: tarjetas grandes redondeadas, botones tipo píldora, azul como
+// color de marca sobre fondo claro). La app sigue siendo de tema claro fijo.
 export const colors = {
-  yellow: '#FFD93D',
-  yellow2: '#FFC800',
-  ink: '#171717',
-  muted: '#777777',
-  bg: '#F4F5F7',
+  brand: '#3B5CFF',
+  brandDark: '#2A46D6',
+  brandTint: '#EAEFFF',
+  onBrand: '#FFFFFF',
+  ink: '#12162B',
+  muted: '#8A8FA3',
+  bg: '#F5F6FB',
   card: '#FFFFFF',
-  line: '#E9EAED',
-  danger: '#E84C4F',
-  success: '#1FA65A',
-  expenseText: '#9F2C34',
-  incomeText: '#147B48',
-  heroLabel: '#675900',
-  categorySelectedBorder: '#D4AA00',
-  categorySelectedBg: '#FFF8D0',
+  line: '#ECEEF5',
+  danger: '#E5484D',
+  success: '#12B76A',
+  expenseText: '#C0272D',
+  incomeText: '#0E9F6E',
+  heroLabel: 'rgba(255,255,255,0.72)',
+  categorySelectedBorder: '#3B5CFF',
+  categorySelectedBg: '#EAEFFF',
   warn: '#F59E0B',
 } as const;

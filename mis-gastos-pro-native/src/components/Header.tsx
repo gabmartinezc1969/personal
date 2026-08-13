@@ -19,7 +19,7 @@ export function Header({ title }: { title: string }) {
 
 const styles = StyleSheet.create({
   header: {
-    backgroundColor: colors.yellow,
+    backgroundColor: colors.bg,
     paddingHorizontal: 18,
     paddingTop: 17,
     paddingBottom: 13,
@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  brand: { fontSize: 22, fontWeight: '900', color: colors.ink },
-  action: { backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: 13, paddingVertical: 9, paddingHorizontal: 12 },
-  actionText: { fontWeight: '800', color: colors.ink },
+  brand: { fontSize: 24, fontWeight: '900', color: colors.ink },
+  action: { backgroundColor: colors.brand, borderRadius: 14, paddingVertical: 10, paddingHorizontal: 16 },
+  actionText: { fontWeight: '800', color: colors.onBrand },
 });

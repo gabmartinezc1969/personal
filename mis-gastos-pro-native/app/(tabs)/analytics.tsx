@@ -144,6 +144,6 @@ const styles = StyleSheet.create({
   rank: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 15, paddingVertical: 11, borderBottomWidth: 1, borderBottomColor: colors.line, backgroundColor: colors.card },
   rankName: { fontWeight: '700', color: colors.ink },
   rankBar: { height: 7, backgroundColor: '#eee', borderRadius: 10, marginTop: 6, overflow: 'hidden' },
-  rankFill: { height: '100%', backgroundColor: colors.yellow, borderRadius: 10 },
+  rankFill: { height: '100%', backgroundColor: colors.brand, borderRadius: 10 },
   rankValue: { fontWeight: '700', color: colors.ink },
 });

@@ -12,8 +12,8 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#A18200',
-        tabBarInactiveTintColor: '#777777',
+        tabBarActiveTintColor: colors.brand,
+        tabBarInactiveTintColor: colors.muted,
         tabBarLabelStyle: { fontWeight: '700', fontSize: 11 },
         tabBarStyle: {
           backgroundColor: '#fff',
@@ -56,12 +56,17 @@ const styles = StyleSheet.create({
     width: 58,
     height: 58,
     borderRadius: 29,
-    backgroundColor: colors.yellow2,
+    backgroundColor: colors.brand,
     borderWidth: 5,
     borderColor: colors.bg,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: -20,
+    shadowColor: colors.brand,
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
   },
-  fabText: { fontSize: 30, color: colors.ink, fontWeight: '600', lineHeight: 34 },
+  fabText: { fontSize: 30, color: colors.onBrand, fontWeight: '600', lineHeight: 34 },
 });
