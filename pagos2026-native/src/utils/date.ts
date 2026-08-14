@@ -73,6 +73,27 @@ export function dayLabel(dateKey: string): string {
   return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
+// Días de diferencia entre hoy (medianoche local) y `dateKey` (positivo =
+// futuro, negativo = vencido). Igual que `diffDays` en la versión web.
+export function daysUntil(dateKey: string): number {
+  const [y, m, d] = dateKey.split('-').map(Number);
+  const target = new Date(y, (m || 1) - 1, d || 1);
+  const now = new Date();
+  const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.round((target.getTime() - todayMidnight.getTime()) / 86400000);
+}
+
+export function prevMonthKey(monthKey: string): string {
+  const [y, m] = monthKey.split('-').map(Number);
+  const d = new Date(y, (m || 1) - 2, 1);
+  return toMonthKey(d);
+}
+
+export function monthYearLabel(monthKey: string): string {
+  const [y, m] = monthKey.split('-').map(Number);
+  return monthLabel(y, (m || 1) - 1);
+}
+
 export function shortDate(dateKey: string): string {
   const [y, m, d] = dateKey.split('-').map(Number);
   const date = new Date(y, (m || 1) - 1, d || 1, 12);

@@ -45,6 +45,8 @@ export default function RootLayout() {
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen name="creditos" options={{ title: 'Créditos y deudas' }} />
               <Stack.Screen name="inversiones" options={{ title: 'Inversiones' }} />
+              <Stack.Screen name="recordatorios" options={{ title: 'Recordatorios de pago' }} />
+              <Stack.Screen name="resumen" options={{ title: 'Resumen mensual' }} />
               <Stack.Screen name="configuracion" options={{ title: 'Configuración' }} />
               <Stack.Screen name="proximamente" options={{ title: '', presentation: 'card' }} />
             </Stack>

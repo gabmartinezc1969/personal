@@ -32,17 +32,22 @@ npm run web        # versión web (react-native-web)
 | **Inicio** (tab) | Tarjeta azul con saldo del mes, gastos/ingresos, presupuesto ejercido, patrimonio neto (inversiones − deuda) y movimientos recientes |
 | **Movimientos** (tab) | Historial completo importado (1,034 registros, 2020–2026), por periodo, con buscador y borrado |
 | **Análisis** (tab) | Desglose de Gastos o Ingresos por categoría (mes o año), dona + ranking |
-| **Más** (tab) | Accesos a Créditos y deudas, Inversiones (funcionales) y a los módulos pendientes (marcados "Próximamente"), más Configuración |
+| **Más** (tab) | Accesos a Recordatorios, Resumen mensual, Créditos y deudas, Inversiones (todos funcionales) y a los módulos aún pendientes (marcados "Próximamente"), más Configuración |
 | **Agregar movimiento** (sheet global, botón + central) | Formulario: tipo, categoría, concepto, monto presupuestado/real, fecha, método de pago, deducible |
+| **Recordatorios de pago** | Gastos presupuestados sin monto real registrado, agrupados por Vencido/Hoy/Próximos 7 días/Próximos 30 días/Más adelante, con "Marcar pagado" y exportación a calendario (.ics) |
+| **Resumen mensual** | KPIs del mes (ingresos, egresos, saldo, tasa de ahorro), comparativo vs. mes anterior, presupuesto por categoría con semáforo 🟢🟡🔴, distribución de egresos, tablas de ingresos/egresos por categoría y Top 10 gastos del mes |
 | **Créditos y deudas** | Lista de créditos importados con saldo insoluto calculado por amortización estándar (tasa, plazo, fecha de inicio) — verificado contra el snapshot del HTML original ($808,903 de saldo BBVA) |
 | **Inversiones** | Lista de inversiones importadas con capital aportado, valor actual y rendimiento % |
 | **Configuración** | Moneda, tamaño de letra, respaldo/restauración en JSON, reinicio a los datos originales |
 
 ### Pendiente para siguientes entregas
 
-Mi Dashboard, Resumen Mensual, Dashboard Anual, Matriz Anual, Suscripciones,
-Patrimonio y Score (con score financiero y liquidez), Alertas, Recordatorios.
-Estos módulos son accesibles desde **Más** con una pantalla "Próximamente".
+Mi Dashboard, Dashboard Anual, Matriz Anual, Suscripciones, Patrimonio y
+Score (con score financiero y liquidez), Alertas. Estos módulos son
+accesibles desde **Más** con una pantalla "Próximamente". Dentro de
+**Resumen mensual** también quedaron fuera de esta entrega dos gráficas del
+original (Evolución diaria del gasto y "De ingresos a ahorro" tipo
+waterfall) — el resto del módulo sí está completo.
 
 ## Datos importados
 
@@ -50,9 +55,13 @@ El respaldo `pagos2026-data.json` (exportado desde la versión web) se
 convirtió a `src/state/seedData.ts` con un script (`scripts` no se incluye
 en el repo — es un one-off de conversión). Se normalizaron dos categorías
 que eran el mismo concepto con nombre distinto entre años: `Hipoteca` →
-`Hipotecario`, `Creditos Mazda` → `Credito Mazda`. Todo lo demás se importó
-tal cual: 1,034 movimientos, 1 crédito (BBVA Hipotecario) y 1 inversión
-(Cetes).
+`Hipotecario`, `Creditos Mazda` → `Credito Mazda`. También se corrigió un
+choque de id entre dos movimientos distintos del respaldo original (bug de
+generación de ids de la versión web): al importar, cualquier id repetido se
+desambigua con un sufijo (`_dupN`) para que cada movimiento tenga una key
+verdaderamente única — importante porque el id se usa para borrar y marcar
+como pagado. Todo lo demás se importó tal cual: 1,034 movimientos, 1 crédito
+(BBVA Hipotecario) y 1 inversión (Cetes).
 
 - **Persistencia:** `@react-native-async-storage/async-storage`, con la
   misma forma de estado (`movements`, `credits`, `investments`,

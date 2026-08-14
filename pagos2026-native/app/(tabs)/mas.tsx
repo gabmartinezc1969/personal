@@ -6,9 +6,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Header } from '@/src/components/Header';
 import { Card } from '@/src/components/ui';
+import { useStore } from '@/src/state/store';
 import { colors } from '@/src/theme/colors';
 
 const READY_ITEMS = [
+  { icon: '🔔', title: 'Recordatorios de pago', subtitle: 'Pagos presupuestados aún sin registrar', route: '/recordatorios' as const },
+  { icon: '📊', title: 'Resumen mensual', subtitle: 'Ingresos y egresos por categoría del mes', route: '/resumen' as const },
   { icon: '🏦', title: 'Créditos y deudas', subtitle: 'Saldo restante y avance de tus créditos', route: '/creditos' as const },
   { icon: '📈', title: 'Inversiones', subtitle: 'Capital aportado y valor actual', route: '/inversiones' as const },
 ];
@@ -17,10 +20,15 @@ const SOON_ITEMS = [
   { icon: '🔁', title: 'Suscripciones' },
   { icon: '🏠', title: 'Patrimonio y score' },
   { icon: '⚠️', title: 'Alertas' },
-  { icon: '🔔', title: 'Recordatorios' },
+  { icon: '📅', title: 'Dashboard anual' },
+  { icon: '🧮', title: 'Matriz anual' },
+  { icon: '🖥️', title: 'Mi dashboard' },
 ];
 
 export default function MasScreen() {
+  const { state } = useStore();
+  const pendingCount = state.movements.filter((m) => m.type === 'E' && m.budgeted > 0 && (m.actual === null || m.actual === 0)).length;
+
   return (
     <SafeAreaView style={styles.screen} edges={['top']}>
       <Header title="Más" />
@@ -34,6 +42,11 @@ export default function MasScreen() {
                 <Text style={styles.rowTitle}>{item.title}</Text>
                 <Text style={styles.rowSubtitle}>{item.subtitle}</Text>
               </View>
+              {item.route === '/recordatorios' && pendingCount > 0 ? (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{pendingCount}</Text>
+                </View>
+              ) : null}
               <Text style={styles.chevron}>›</Text>
             </Pressable>
           ))}
@@ -80,4 +93,6 @@ const styles = StyleSheet.create({
   rowTitle: { fontWeight: '700', color: colors.ink, fontSize: 15 },
   rowSubtitle: { fontSize: 12, color: colors.muted, marginTop: 2 },
   chevron: { fontSize: 20, color: colors.muted },
+  badge: { backgroundColor: colors.warn, borderRadius: 999, minWidth: 22, height: 22, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6 },
+  badgeText: { fontSize: 11, fontWeight: '800', color: '#fff' },
 });

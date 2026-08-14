@@ -12,6 +12,7 @@ type Ctx = {
   ready: boolean;
   addMovement: (m: Omit<Movement, 'id'>) => void;
   deleteMovement: (movementId: string) => void;
+  markPaid: (movementId: string, amount: number) => void;
   upsertCategory: (category: Category) => void;
   setCurrency: (currency: Currency) => void;
   setFontScale: (scale: FontScale) => void;
@@ -65,6 +66,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setState((prev) => ({ ...prev, movements: prev.movements.filter((m) => m.id !== movementId) }));
   }, []);
 
+  const markPaid = useCallback((movementId: string, amount: number) => {
+    setState((prev) => ({ ...prev, movements: prev.movements.map((m) => (m.id === movementId ? { ...m, actual: amount } : m)) }));
+  }, []);
+
   const upsertCategory = useCallback((category: Category) => {
     setState((prev) => {
       const exists = prev.categories.some((c) => c.id === category.id);
@@ -92,8 +97,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const value = useMemo<Ctx>(
-    () => ({ state, ready, addMovement, deleteMovement, upsertCategory, setCurrency, setFontScale, restoreState, resetState }),
-    [state, ready, addMovement, deleteMovement, upsertCategory, setCurrency, setFontScale, restoreState, resetState]
+    () => ({ state, ready, addMovement, deleteMovement, markPaid, upsertCategory, setCurrency, setFontScale, restoreState, resetState }),
+    [state, ready, addMovement, deleteMovement, markPaid, upsertCategory, setCurrency, setFontScale, restoreState, resetState]
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
@@ -111,6 +116,14 @@ export function categoryByName(state: AppState, name: string): Category {
 
 export function movementAmount(m: Movement): number {
   return m.actual ?? m.budgeted ?? 0;
+}
+
+// "Real" en sentido estricto (igual que `realSum()` en la versión web): un
+// movimiento sin monto real registrado cuenta como $0, no como su
+// presupuesto. Se usa en Resumen Mensual para poder comparar presupuesto vs.
+// real sin inflar lo "ya ejercido" con lo que todavía no ha pasado.
+export function strictActual(m: Movement): number {
+  return m.actual ?? 0;
 }
 
 export function totals(list: Movement[]): { income: number; expense: number } {
