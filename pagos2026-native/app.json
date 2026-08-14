@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Pagos 2026",
-    "slug": "pagos2026-native",
+    "name": "Pagos 2026 Finanzas",
+    "slug": "pagos2026-finanzas-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -9,7 +9,7 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.pagos2026.app"
+      "bundleIdentifier": "com.pagos2026.finanzas"
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +19,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.pagos2026.app"
+      "package": "com.pagos2026.finanzas"
     },
     "web": {
       "bundler": "metro",
