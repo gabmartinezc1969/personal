@@ -1,5 +1,5 @@
 import DateTimePicker, { DateTimePickerAndroid, DateTimePickerEvent } from '@react-native-community/datetimepicker';
-import React, { useState } from 'react';
+import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import { Modal, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { AppText as Text } from './AppText';
 
@@ -12,7 +12,9 @@ function parseDateKey(value: string): Date {
   return new Date(y || 1970, (m || 1) - 1, d || 1, 12);
 }
 
-export function DateField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+export type DateFieldHandle = { open: () => void };
+
+export const DateField = forwardRef<DateFieldHandle, { value: string; onChange: (v: string) => void }>(function DateField({ value, onChange }, ref) {
   const [open, setOpen] = useState(false);
   const dateObj = parseDateKey(value);
   const label = new Intl.DateTimeFormat('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }).format(dateObj);
@@ -36,6 +38,8 @@ export function DateField({ value, onChange }: { value: string; onChange: (v: st
     setOpen(true);
   }
 
+  useImperativeHandle(ref, () => ({ open: openPicker }));
+
   return (
     <>
       <Pressable style={styles.field} onPress={openPicker}>
@@ -56,7 +60,7 @@ export function DateField({ value, onChange }: { value: string; onChange: (v: st
       ) : null}
     </>
   );
-}
+});
 
 const styles = StyleSheet.create({
   field: { flex: 1, backgroundColor: '#fff', borderRadius: 8, padding: 12, justifyContent: 'center' },

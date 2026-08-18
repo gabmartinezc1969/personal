@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { AppText as Text, AppTextInput as TextInput } from './AppText';
 
@@ -13,7 +13,7 @@ import { today } from '../utils/date';
 import { formatMoney } from '../utils/money';
 import { CategoryBubble } from './CategoryBubble';
 import { CategoryModal } from './CategoryModal';
-import { DateField } from './DateField';
+import { DateField, DateFieldHandle } from './DateField';
 import { OptionPickerModal } from './OptionPickerModal';
 import { TextBtn } from './ui';
 
@@ -36,6 +36,8 @@ export function TransactionEditorModal() {
   // La calculadora sólo se despliega al elegir una categoría, y se vuelve a
   // esconder al confirmar el monto con "=" (ver keyPress).
   const [calculatorOpen, setCalculatorOpen] = useState(false);
+  const scrollRef = useRef<ScrollView>(null);
+  const dateFieldRef = useRef<DateFieldHandle>(null);
 
   useEffect(() => {
     if (!txEditorOpen) return;
@@ -60,6 +62,10 @@ export function TransactionEditorModal() {
   function chooseCategory(categoryId: string) {
     setSelectedCategory(categoryId);
     setCalculatorOpen(true);
+    // Deja que la calculadora, el memorándum y la fecha terminen de
+    // renderizarse antes de bajar el scroll, o si no el sheet aún mide el
+    // alto anterior y el desplazamiento queda corto.
+    setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 50);
   }
 
   function keyPress(key: string) {
@@ -73,7 +79,7 @@ export function TransactionEditorModal() {
       }
       setExpression(String(value));
       setCalculatorOpen(false);
-    } else if (key === 'Hoy') setDate(today());
+    } else if (key === 'Hoy') dateFieldRef.current?.open();
     else setExpression((e) => e + (key === '−' ? '-' : key));
   }
 
@@ -118,7 +124,7 @@ export function TransactionEditorModal() {
               </View>
             </View>
 
-            <ScrollView contentContainerStyle={{ paddingBottom: 8 }}>
+            <ScrollView ref={scrollRef} contentContainerStyle={{ paddingBottom: 8 }}>
               <View style={styles.categoryGrid}>
                 {categories.map((c) => (
                   <Pressable
@@ -166,7 +172,7 @@ export function TransactionEditorModal() {
                   )}
                   <TextInput style={styles.memo} value={memo} onChangeText={setMemo} placeholder="Memorándum: Introduce una nota…" />
                   <View style={styles.dateAccount}>
-                    <DateField value={date} onChange={setDate} />
+                    <DateField ref={dateFieldRef} value={date} onChange={setDate} />
                     <Pressable style={styles.field} onPress={() => setAccountPickerOpen(true)}>
                       <Text style={styles.text}>{account}</Text>
                     </Pressable>
