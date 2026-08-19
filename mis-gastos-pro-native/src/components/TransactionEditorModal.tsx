@@ -151,6 +151,17 @@ export function TransactionEditorModal() {
 
               {selectedCategory ? (
                 <View style={styles.calculator}>
+                  {/* El memorándum va antes del teclado/monto para que quede
+                      visible de inmediato al elegir categoría, sin quedar
+                      tapado por las 4 filas del teclado ni por el teclado
+                      nativo del sistema al escribir la nota. */}
+                  <TextInput style={styles.memo} value={memo} onChangeText={setMemo} placeholder="Memorándum: Introduce una nota…" />
+                  <View style={styles.dateAccount}>
+                    <DateField ref={dateFieldRef} value={date} onChange={setDate} />
+                    <Pressable style={styles.field} onPress={() => setAccountPickerOpen(true)}>
+                      <Text style={styles.text}>{account}</Text>
+                    </Pressable>
+                  </View>
                   {calculatorOpen ? (
                     <>
                       <Text style={styles.calcDisplay} numberOfLines={1} adjustsFontSizeToFit>
@@ -170,13 +181,6 @@ export function TransactionEditorModal() {
                       <Text style={styles.amountSummaryValue}>{formatMoney(safeEvaluate(expression) ?? 0, state.currency)}</Text>
                     </Pressable>
                   )}
-                  <TextInput style={styles.memo} value={memo} onChangeText={setMemo} placeholder="Memorándum: Introduce una nota…" />
-                  <View style={styles.dateAccount}>
-                    <DateField ref={dateFieldRef} value={date} onChange={setDate} />
-                    <Pressable style={styles.field} onPress={() => setAccountPickerOpen(true)}>
-                      <Text style={styles.text}>{account}</Text>
-                    </Pressable>
-                  </View>
                 </View>
               ) : null}
             </ScrollView>
