@@ -1,4 +1,15 @@
-# Rumbo
+# Apps personales
+
+Este repositorio reúne varias apps personales de un solo archivo HTML, cada
+una con su contraparte como app móvil React Native (Expo + TypeScript).
+
+| App | Web (un solo archivo) | Móvil (React Native) |
+|---|---|---|
+| **Rumbo** — productividad personal y en equipo (estilo Any.do) | [`rumbo.html`](rumbo.html) | [`rumbo-native/`](rumbo-native/README.md) |
+| **Mis Gastos Pro** — finanzas personales (gastos, ingresos, presupuestos) | [`mis-gastos-pro.html`](mis-gastos-pro.html) | [`mis-gastos-pro-native/`](mis-gastos-pro-native/README.md) |
+| **Pagos 2026** — centro financiero profesional (movimientos, créditos, inversiones) | [`pagos2026.html`](pagos2026.html) | [`pagos2026-native/`](pagos2026-native/README.md) |
+
+## Rumbo
 
 Aplicación de productividad personal y en equipo (estilo Any.do), implementada
 como referencia **clean-room** a partir de la especificación técnica
@@ -11,7 +22,7 @@ Dos entregables en este repositorio:
 | `rumbo.html` | Versión web en un solo archivo (abrir con doble clic, sin instalación) |
 | `rumbo-native/` | **App móvil React Native** (Expo + TypeScript) para iOS/Android — ver [su README](rumbo-native/README.md) |
 
-## Cómo usarla
+### Cómo usarla
 
 `rumbo.html` es un archivo único, autocontenido y sin dependencias externas ni
 backend. Para usarla:
@@ -20,7 +31,7 @@ backend. Para usarla:
 2. Ábrelo con doble clic en cualquier navegador moderno (Chrome, Edge, Firefox, Safari).
 3. Todo se guarda localmente en el navegador (`localStorage`). No requiere conexión a internet ni instalación.
 
-## Qué incluye
+### Qué incluye
 
 - **Mi Día** — selección diaria, fijados y sugerencias por vencimiento.
 - **Listas y tareas** — subtareas, notas, prioridad, etiquetas, adjuntos, recurrencia (diaria, semanal, mensual, anual, días personalizados) y recordatorios.
@@ -35,6 +46,55 @@ de la especificación original están implementados por completo en el cliente,
 cuáles son versiones simplificadas y cuáles quedan fuera de alcance por
 requerir un backend real (identidad multiusuario, facturación, sincronización
 multidispositivo, integraciones OAuth, gobierno/auditoría).
+
+## Mis Gastos Pro
+
+App de finanzas personales: registro de gastos e ingresos, análisis por
+categoría, presupuestos y respaldo de datos.
+
+| Carpeta / archivo | Qué es |
+|---|---|
+| `mis-gastos-pro.html` | Versión web en un solo archivo (abrir con doble clic, sin instalación) |
+| `mis-gastos-pro-native/` | **App móvil React Native** (Expo + TypeScript) para iOS/Android — ver [su README](mis-gastos-pro-native/README.md) |
+
+### Cómo usarla
+
+`mis-gastos-pro.html` es un archivo único, autocontenido y sin dependencias
+externas ni backend. Para usarla:
+
+1. Descarga `mis-gastos-pro.html`.
+2. Ábrelo con doble clic en cualquier navegador moderno (Chrome, Edge, Firefox, Safari).
+3. Todo se guarda localmente en el navegador (`localStorage`). No requiere conexión a internet ni instalación.
+
+### Qué incluye
+
+- **Registros** — periodo mensual, totales de gastos/ingresos, búsqueda y lista agrupada por día, exportar a CSV.
+- **Cuadro (análisis)** — gráfico de dona y ranking de categorías por mes o año, para gastos o ingresos.
+- **Informes** — presupuesto mensual global con anillo de disponibilidad, y presupuestos por categoría con barra de progreso.
+- **Categorías personalizables** — nombre, icono, color y tipo (gasto/ingreso); plantilla inicial de más de 30 categorías.
+- **Perfil** — moneda (MXN/USD/EUR), respaldo y restauración en JSON, reinicio de datos.
+
+## Pagos 2026
+
+Centro financiero profesional: movimientos de ingresos/gastos, créditos y
+deudas (con cálculo de amortización), inversiones, y dashboard de KPIs
+mensuales. La versión web original (`pagos2026.html`) tiene 15 módulos; la
+app móvil (`pagos2026-native/`) cubre por ahora el núcleo esencial y suma
+el resto módulo por módulo — ver [su README](pagos2026-native/README.md)
+para el detalle de qué está listo y qué queda pendiente.
+
+| Carpeta / archivo | Qué es |
+|---|---|
+| `pagos2026.html` | Versión web en un solo archivo (con persistencia SQLite embebida) |
+| `pagos2026-data.json` | Respaldo de datos importado a la app móvil (movimientos, créditos, inversiones) |
+| `pagos2026-native/` | **App móvil React Native** (Expo + TypeScript) para iOS/Android — ver [su README](pagos2026-native/README.md) |
+
+### Cómo usar la versión web
+
+`pagos2026.html` es un archivo único y autocontenido. Descárgalo y ábrelo
+con doble clic en cualquier navegador moderno; todo se guarda localmente
+(SQLite embebido en el propio navegador). No requiere conexión a internet
+ni instalación.
 
 ## Licencia / marca
 
