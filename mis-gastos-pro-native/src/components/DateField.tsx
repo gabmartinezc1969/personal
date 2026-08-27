@@ -1,5 +1,5 @@
-import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
-import React, { useState } from 'react';
+import DateTimePicker, { DateTimePickerAndroid, DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import { Modal, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { AppText as Text } from './AppText';
 
@@ -12,27 +12,39 @@ function parseDateKey(value: string): Date {
   return new Date(y || 1970, (m || 1) - 1, d || 1, 12);
 }
 
-export function DateField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+export type DateFieldHandle = { open: () => void };
+
+export const DateField = forwardRef<DateFieldHandle, { value: string; onChange: (v: string) => void }>(function DateField({ value, onChange }, ref) {
   const [open, setOpen] = useState(false);
   const dateObj = parseDateKey(value);
   const label = new Intl.DateTimeFormat('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }).format(dateObj);
 
   function handleChange(event: DateTimePickerEvent, selected?: Date) {
+    if (selected && event.type === 'set') onChange(toDateKey(selected));
+  }
+
+  function openPicker() {
     if (Platform.OS === 'android') {
-      setOpen(false);
-      if (event.type === 'set' && selected) onChange(toDateKey(selected));
+      // En Android usamos la API imperativa: renderizar <DateTimePicker>
+      // declarativamente dentro del <Modal> del sheet "Agregar" hace que el
+      // diálogo nativo del calendario quede detrás de la ventana del Modal
+      // (bug conocido de @react-native-community/datetimepicker con Modals
+      // anidados) — al tocar la fecha parecía no pasar nada. La API
+      // imperativa abre el diálogo nativo directamente sobre la Activity,
+      // sin ese problema de apilamiento de ventanas.
+      DateTimePickerAndroid.open({ value: dateObj, mode: 'date', onChange: handleChange });
       return;
     }
-    if (selected) onChange(toDateKey(selected));
+    setOpen(true);
   }
+
+  useImperativeHandle(ref, () => ({ open: openPicker }));
 
   return (
     <>
-      <Pressable style={styles.field} onPress={() => setOpen(true)}>
+      <Pressable style={styles.field} onPress={openPicker}>
         <Text style={styles.text}>{label}</Text>
       </Pressable>
-
-      {Platform.OS === 'android' && open ? <DateTimePicker value={dateObj} mode="date" display="default" onChange={handleChange} /> : null}
 
       {Platform.OS !== 'android' ? (
         <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
@@ -48,7 +60,7 @@ export function DateField({ value, onChange }: { value: string; onChange: (v: st
       ) : null}
     </>
   );
-}
+});
 
 const styles = StyleSheet.create({
   field: { flex: 1, backgroundColor: '#fff', borderRadius: 8, padding: 12, justifyContent: 'center' },

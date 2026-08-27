@@ -1,6 +1,7 @@
 import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { TransactionEditorModal } from '@/src/components/TransactionEditorModal';
 import { StoreProvider } from '@/src/state/store';
@@ -30,25 +31,27 @@ const navTheme = {
 
 export default function RootLayout() {
   return (
-    <StoreProvider>
-      <ToastProvider>
-        <UIProvider>
-          <ThemeProvider value={navTheme}>
-            <StatusBar style="dark" />
-            <Stack
-              screenOptions={{
-                headerTintColor: colors.ink,
-                headerStyle: { backgroundColor: colors.card },
-                headerShadowVisible: false,
-                headerTitleStyle: { fontWeight: '800' },
-              }}>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="categories" options={{ title: 'Plantilla de categorías', presentation: 'modal' }} />
-            </Stack>
-            <TransactionEditorModal />
-          </ThemeProvider>
-        </UIProvider>
-      </ToastProvider>
-    </StoreProvider>
+    <SafeAreaProvider>
+      <StoreProvider>
+        <ToastProvider>
+          <UIProvider>
+            <ThemeProvider value={navTheme}>
+              <StatusBar style="dark" />
+              <Stack
+                screenOptions={{
+                  headerTintColor: colors.ink,
+                  headerStyle: { backgroundColor: colors.card },
+                  headerShadowVisible: false,
+                  headerTitleStyle: { fontWeight: '800' },
+                }}>
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="categories" options={{ title: 'Plantilla de categorías', presentation: 'modal' }} />
+              </Stack>
+              <TransactionEditorModal />
+            </ThemeProvider>
+          </UIProvider>
+        </ToastProvider>
+      </StoreProvider>
+    </SafeAreaProvider>
   );
 }

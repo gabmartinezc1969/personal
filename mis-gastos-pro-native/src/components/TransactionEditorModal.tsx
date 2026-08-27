@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { AppText as Text, AppTextInput as TextInput } from './AppText';
 
@@ -10,9 +10,10 @@ import { useUI } from '../state/ui';
 import { colors } from '../theme/colors';
 import { safeEvaluate } from '../utils/calc';
 import { today } from '../utils/date';
+import { formatMoney } from '../utils/money';
 import { CategoryBubble } from './CategoryBubble';
 import { CategoryModal } from './CategoryModal';
-import { DateField } from './DateField';
+import { DateField, DateFieldHandle } from './DateField';
 import { OptionPickerModal } from './OptionPickerModal';
 import { TextBtn } from './ui';
 
@@ -32,10 +33,17 @@ export function TransactionEditorModal() {
   const [account, setAccount] = useState(ACCOUNTS[0]);
   const [accountPickerOpen, setAccountPickerOpen] = useState(false);
   const [categoryModal, setCategoryModal] = useState<{ open: boolean; editing: Category | null }>({ open: false, editing: null });
+  // La calculadora sólo se despliega al elegir una categoría, y se vuelve a
+  // esconder al confirmar el monto con "=" (ver keyPress).
+  const [calculatorOpen, setCalculatorOpen] = useState(false);
+  const scrollRef = useRef<ScrollView>(null);
+  const dateFieldRef = useRef<DateFieldHandle>(null);
 
   useEffect(() => {
     if (!txEditorOpen) return;
     setType(txEditorType);
+    setSelectedCategory('');
+    setCalculatorOpen(false);
     setExpression('');
     setMemo('');
     setDate(today());
@@ -45,8 +53,20 @@ export function TransactionEditorModal() {
   const categories = useMemo(() => state.categories.filter((c) => c.type === type), [state.categories, type]);
 
   useEffect(() => {
-    if (!categories.some((c) => c.id === selectedCategory)) setSelectedCategory(categories[0]?.id ?? '');
+    if (selectedCategory && !categories.some((c) => c.id === selectedCategory)) {
+      setSelectedCategory('');
+      setCalculatorOpen(false);
+    }
   }, [categories, selectedCategory]);
+
+  function chooseCategory(categoryId: string) {
+    setSelectedCategory(categoryId);
+    setCalculatorOpen(true);
+    // Deja que la calculadora, el memorándum y la fecha terminen de
+    // renderizarse antes de bajar el scroll, o si no el sheet aún mide el
+    // alto anterior y el desplazamiento queda corto.
+    setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 50);
+  }
 
   function keyPress(key: string) {
     if (key === '⌫') setExpression((e) => e.slice(0, -1));
@@ -58,11 +78,16 @@ export function TransactionEditorModal() {
         return;
       }
       setExpression(String(value));
-    } else if (key === 'Hoy') setDate(today());
+      setCalculatorOpen(false);
+    } else if (key === 'Hoy') dateFieldRef.current?.open();
     else setExpression((e) => e + (key === '−' ? '-' : key));
   }
 
   function save() {
+    if (!selectedCategory) {
+      toast('Selecciona una categoría');
+      return;
+    }
     const amount = safeEvaluate(expression || '0');
     if (!amount || amount <= 0) {
       toast('Ingresa un monto válido');
@@ -99,13 +124,13 @@ export function TransactionEditorModal() {
               </View>
             </View>
 
-            <ScrollView contentContainerStyle={{ paddingBottom: 8 }}>
+            <ScrollView ref={scrollRef} contentContainerStyle={{ paddingBottom: 8 }}>
               <View style={styles.categoryGrid}>
                 {categories.map((c) => (
                   <Pressable
                     key={c.id}
                     style={[styles.categoryCell, c.id === selectedCategory && styles.categoryCellSelected]}
-                    onPress={() => setSelectedCategory(c.id)}
+                    onPress={() => chooseCategory(c.id)}
                     onLongPress={() => setCategoryModal({ open: true, editing: c })}>
                     <CategoryBubble icon={c.icon} color={c.color} />
                     <Text style={styles.categoryLabel} numberOfLines={1}>
@@ -124,25 +149,36 @@ export function TransactionEditorModal() {
                 </Pressable>
               </View>
 
-              <View style={styles.calculator}>
-                <Text style={styles.calcDisplay} numberOfLines={1} adjustsFontSizeToFit>
-                  {expression || '0'}
-                </Text>
-                <TextInput style={styles.memo} value={memo} onChangeText={setMemo} placeholder="Memorándum: Introduce una nota…" />
-                <View style={styles.keypad}>
-                  {KEYS.map((k) => (
-                    <Pressable key={k} style={[styles.key, k === '=' && styles.keyEqual, k === 'Hoy' && styles.keyAction]} onPress={() => keyPress(k)}>
-                      <Text style={[styles.keyText, k === '=' && styles.keyEqualText]}>{k}</Text>
+              {selectedCategory ? (
+                <View style={styles.calculator}>
+                  {calculatorOpen ? (
+                    <>
+                      <Text style={styles.calcDisplay} numberOfLines={1} adjustsFontSizeToFit>
+                        {expression || '0'}
+                      </Text>
+                      <View style={styles.keypad}>
+                        {KEYS.map((k) => (
+                          <Pressable key={k} style={[styles.key, k === '=' && styles.keyEqual, k === 'Hoy' && styles.keyAction]} onPress={() => keyPress(k)}>
+                            <Text style={[styles.keyText, k === '=' && styles.keyEqualText]}>{k}</Text>
+                          </Pressable>
+                        ))}
+                      </View>
+                    </>
+                  ) : (
+                    <Pressable style={styles.amountSummary} onPress={() => setCalculatorOpen(true)}>
+                      <Text style={styles.amountSummaryLabel}>Monto · toca para editar</Text>
+                      <Text style={styles.amountSummaryValue}>{formatMoney(safeEvaluate(expression) ?? 0, state.currency)}</Text>
                     </Pressable>
-                  ))}
+                  )}
+                  <TextInput style={styles.memo} value={memo} onChangeText={setMemo} placeholder="Memorándum: Introduce una nota…" />
+                  <View style={styles.dateAccount}>
+                    <DateField ref={dateFieldRef} value={date} onChange={setDate} />
+                    <Pressable style={styles.field} onPress={() => setAccountPickerOpen(true)}>
+                      <Text style={styles.text}>{account}</Text>
+                    </Pressable>
+                  </View>
                 </View>
-                <View style={styles.dateAccount}>
-                  <DateField value={date} onChange={setDate} />
-                  <Pressable style={styles.field} onPress={() => setAccountPickerOpen(true)}>
-                    <Text style={styles.text}>{account}</Text>
-                  </Pressable>
-                </View>
-              </View>
+              ) : null}
             </ScrollView>
           </Pressable>
         </KeyboardAvoidingView>
@@ -156,7 +192,7 @@ export function TransactionEditorModal() {
         onSave={(category) => {
           upsertCategory(category);
           setType(category.type);
-          setSelectedCategory(category.id);
+          chooseCategory(category.id);
           setCategoryModal({ open: false, editing: null });
           toast('Categoría guardada');
         }}
@@ -195,6 +231,9 @@ const styles = StyleSheet.create({
   toolBtnText: { fontWeight: '700', color: colors.ink, fontSize: 12 },
   calculator: { backgroundColor: '#f0f0f0', paddingHorizontal: 15, paddingTop: 12, paddingBottom: 16 },
   calcDisplay: { fontSize: 34, textAlign: 'right', paddingVertical: 8, minHeight: 57, color: colors.ink, fontWeight: '600' },
+  amountSummary: { backgroundColor: '#fff', borderRadius: 12, paddingVertical: 12, paddingHorizontal: 14, marginBottom: 10 },
+  amountSummaryLabel: { fontSize: 11, fontWeight: '700', color: colors.muted },
+  amountSummaryValue: { fontSize: 26, fontWeight: '800', color: colors.ink, marginTop: 2, textAlign: 'right' },
   memo: { backgroundColor: '#fff', borderRadius: 8, padding: 13, marginBottom: 10, color: colors.ink },
   keypad: { flexDirection: 'row', flexWrap: 'wrap', gap: 7 },
   key: { width: '23.2%', backgroundColor: '#fff', borderRadius: 7, minHeight: 54, alignItems: 'center', justifyContent: 'center' },

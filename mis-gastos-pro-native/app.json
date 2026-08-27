@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Mis Gastos Pro",
-    "slug": "mis-gastos-pro-native",
+    "slug": "mis-gastos-pro",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -19,7 +19,8 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.misgastospro.app"
+      "package": "com.misgastospro.app",
+      "versionCode": 2
     },
     "web": {
       "bundler": "metro",
@@ -41,6 +42,19 @@
       "typedRoutes": true
     },
     "splash": {},
-    "backgroundColor": "#3B5CFF"
+    "backgroundColor": "#3B5CFF",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "7a77bd91-19dc-4a67-9946-f879c3590c26"
+      }
+    },
+    "owner": "gabrielmcorona",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/7a77bd91-19dc-4a67-9946-f879c3590c26"
+    }
   }
 }
