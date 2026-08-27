@@ -1,12 +1,19 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useUI } from '@/src/state/ui';
 import { colors } from '@/src/theme/colors';
 
 export default function TabLayout() {
   const { openTxEditor } = useUI();
+  const insets = useSafeAreaInsets();
+  // Alto base del contenido de la barra (iconos + etiqueta) sin contar el
+  // espacio del sistema. Se le suma insets.bottom para no quedar detrás de
+  // la barra de navegación/gestos de Android (pantalla de borde a borde) ni
+  // del home indicator de iOS.
+  const baseHeight = Platform.OS === 'ios' ? 58 : 60;
 
   return (
     <Tabs
@@ -19,8 +26,9 @@ export default function TabLayout() {
           backgroundColor: '#fff',
           borderTopColor: colors.line,
           borderTopWidth: 1,
-          height: Platform.OS === 'ios' ? 88 : 68,
+          height: baseHeight + insets.bottom,
           paddingTop: 8,
+          paddingBottom: insets.bottom,
         },
       }}>
       <Tabs.Screen name="index" options={{ title: 'Registros', tabBarIcon: ({ color }) => <TabGlyph glyph="▤" color={color} /> }} />
