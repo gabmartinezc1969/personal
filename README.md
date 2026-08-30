@@ -10,6 +10,7 @@ Dos entregables en este repositorio:
 |---|---|
 | `rumbo.html` | Versión web en un solo archivo (abrir con doble clic, sin instalación) |
 | `rumbo-native/` | **App móvil React Native** (Expo + TypeScript) para iOS/Android — ver [su README](rumbo-native/README.md) |
+| `galeria-fotos.html` | Galería de fotos local en un solo archivo — ver detalles más abajo |
 
 ## Cómo usarla
 
@@ -40,3 +41,50 @@ multidispositivo, integraciones OAuth, gobierno/auditoría).
 
 Nombre, interfaz y estructura de datos son propios de esta implementación
 (sin código, textos, marca ni interfaz de terceros).
+
+---
+
+# Galería de Fotos Local (`galeria-fotos.html`)
+
+Galería de fotos en un solo archivo HTML, sin backend ni dependencias
+externas. Muestra en cuadrícula las fotos de una carpeta local (o de una
+unidad de red mapeada como carpeta local, por ejemplo un NAS), con vista a
+pantalla completa y organización por carpeta o por fecha.
+
+**Nota importante:** este entorno de ejecución en la nube no tiene acceso a
+direcciones IP privadas (como `192.168.68.108`), por lo que no fue posible
+conectarse directamente a esa unidad para inspeccionar dónde guarda las
+fotos. En su lugar, la app se diseñó para que sea el propio navegador (que sí
+corre en tu red local) el que lea las fotos: elegís la carpeta y todo se
+procesa en tu máquina.
+
+## Cómo usarla
+
+1. Descarga `galeria-fotos.html` y ábrelo con doble clic en Chrome o Edge
+   (recomendado por su soporte completo de selección de carpetas).
+2. Si tus fotos están en el NAS/dispositivo de `192.168.68.108`, primero
+   mapealo como unidad o carpeta local:
+   - **Windows:** Explorador de archivos → "Conectar a unidad de red" →
+     `\\192.168.68.108\<carpeta_compartida>`.
+   - **macOS:** Finder → Ir → Conectarse al servidor → `smb://192.168.68.108`.
+   - **Linux:** montá el recurso compartido (SMB/NFS/WebDAV) con tu gestor de
+     archivos o `mount`.
+3. En la app, hacé clic en **"Elegir carpeta…"** y seleccioná la carpeta de
+   fotos (local o la unidad de red ya montada). También podés arrastrar y
+   soltar una carpeta o fotos sueltas sobre la ventana.
+4. Usá los botones **"Por carpeta"**, **"Por fecha"** o **"Todas"** para
+   organizar la vista, y la barra lateral para filtrar por carpeta/mes.
+5. Hacé clic en cualquier miniatura para verla a tamaño completo (flechas o
+   ←/→ para navegar, Esc para cerrar).
+
+## Qué incluye
+
+- **Cuadrícula de miniaturas** con carga diferida (`lazy loading`).
+- **Vista de tamaño completo** (lightbox) con navegación por teclado.
+- **Organización por carpeta** (según la estructura real de archivos) y
+  **por fecha** (fecha EXIF de la foto cuando está disponible; si no, la
+  fecha de modificación del archivo).
+- **Búsqueda por nombre** y orden por fecha o nombre.
+- Selección por carpeta completa, por archivos sueltos, o arrastrar y soltar.
+- 100% local: las fotos nunca salen de tu computadora ni se suben a ningún
+  servidor; no requiere conexión a internet para funcionar.
