@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Galería de Fotos Local</title>
+<title>Galería de Fotos Local y Remota</title>
 <style>
   :root{
     --bg:#0f1115;
@@ -148,6 +148,29 @@
   }
   #dropzone-hint.show{display:flex;}
 
+  /* Remote-connect modal */
+  #remote-modal{
+    position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;z-index:1001;
+    align-items:center;justify-content:center;padding:20px;
+  }
+  #remote-modal.open{display:flex;}
+  #remote-modal .box{
+    background:var(--bg-panel);border:1px solid var(--border);border-radius:12px;
+    padding:22px;max-width:520px;width:100%;
+  }
+  #remote-modal h3{margin:0 0 6px;font-size:16px;}
+  #remote-modal p{margin:0 0 14px;font-size:13px;color:var(--text-dim);line-height:1.5;}
+  #remote-modal label{font-size:12px;font-weight:600;display:block;margin-bottom:6px;}
+  #remote-url{
+    width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);
+    padding:10px 12px;font-size:13px;margin-bottom:6px;
+  }
+  #remote-hint{font-size:11.5px;color:var(--text-dim);margin-bottom:16px;}
+  #remote-status{font-size:12.5px;margin:10px 0 0;min-height:18px;}
+  #remote-status.error{color:var(--danger);}
+  #remote-status.ok{color:#5fd68a;}
+  .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:6px;}
+
   ::-webkit-scrollbar{width:10px;height:10px;}
   ::-webkit-scrollbar-thumb{background:var(--border);border-radius:6px;}
 </style>
@@ -160,6 +183,7 @@
     </h1>
     <button class="btn" id="btn-open-folder">Elegir carpeta…</button>
     <button class="btn secondary" id="btn-open-files">Elegir archivos…</button>
+    <button class="btn secondary" id="btn-open-remote">Servidor remoto (HTTP)…</button>
     <input type="file" id="input-folder" webkitdirectory directory multiple accept="image/*">
     <input type="file" id="input-files" multiple accept="image/*">
 
@@ -186,21 +210,51 @@
         <div class="icon">🖼️</div>
         <p>
           Elegí una carpeta local con fotos (por ejemplo, una unidad de red mapeada de tu NAS,
-          o cualquier carpeta de tu computadora) para generar la galería.<br><br>
-          Todo se procesa <strong>en tu navegador</strong>: ninguna foto se sube a internet.
+          o cualquier carpeta de tu computadora), o conectate a un <strong>servidor remoto</strong>
+          para acceder a tus fotos desde fuera de tu red local (recomendado: NAS + VPN personal
+          como Tailscale — ver el <code>README.md</code>).<br><br>
+          En modo local, todo se procesa <strong>en tu navegador</strong> y ninguna foto se sube a
+          internet; en modo remoto, las fotos viajan solo entre tu navegador y tu propio servidor.
         </p>
-        <button class="btn" id="btn-open-folder-2">Elegir carpeta…</button>
+        <div style="display:flex;gap:10px;">
+          <button class="btn" id="btn-open-folder-2">Elegir carpeta…</button>
+          <button class="btn secondary" id="btn-open-remote-2">Servidor remoto (HTTP)…</button>
+        </div>
       </div>
     </div>
   </main>
 
   <footer>
     <span id="status">Sin fotos cargadas</span>
-    <span>Galería local · sin servidor · sin conexión a internet</span>
+    <span id="source-info">Local · sin subir fotos a internet</span>
   </footer>
 </div>
 
 <div id="dropzone-hint">Soltá la carpeta o las fotos acá</div>
+
+<div id="remote-modal">
+  <div class="box">
+    <h3>Conectar a un servidor remoto</h3>
+    <p>
+      Pegá la URL de una carpeta servida por HTTP que contenga tus fotos (por ejemplo, un
+      servidor de archivos corriendo en tu NAS y accesible mediante tu VPN personal como
+      Tailscale). La página necesita mostrar un <em>listado de carpeta</em> (autoindex) —
+      funciona con Apache, nginx, Caddy, <code>python3 -m http.server</code>, etc.
+    </p>
+    <label for="remote-url">URL de la carpeta</label>
+    <input type="text" id="remote-url" placeholder="http://mi-nas.tailnet.ts.net:8080/Fotos/" autocomplete="off">
+    <div id="remote-hint">
+      Si el servidor pide usuario y contraseña, el navegador te los va a pedir de forma nativa
+      la primera vez. Para usarla fuera de casa, primero conectá tu dispositivo a la misma VPN
+      que el NAS (ver el <code>README.md</code> del proyecto).
+    </div>
+    <div id="remote-status"></div>
+    <div class="modal-actions">
+      <button class="btn secondary" id="btn-remote-cancel">Cancelar</button>
+      <button class="btn" id="btn-remote-connect">Conectar</button>
+    </div>
+  </div>
+</div>
 
 <div id="lightbox">
   <button id="lb-close">✕</button>
@@ -233,6 +287,14 @@
     btnOpenFolder: document.getElementById("btn-open-folder"),
     btnOpenFolder2: document.getElementById("btn-open-folder-2"),
     btnOpenFiles: document.getElementById("btn-open-files"),
+    btnOpenRemote: document.getElementById("btn-open-remote"),
+    btnOpenRemote2: document.getElementById("btn-open-remote-2"),
+    remoteModal: document.getElementById("remote-modal"),
+    remoteUrl: document.getElementById("remote-url"),
+    remoteStatus: document.getElementById("remote-status"),
+    btnRemoteConnect: document.getElementById("btn-remote-connect"),
+    btnRemoteCancel: document.getElementById("btn-remote-cancel"),
+    sourceInfo: document.getElementById("source-info"),
     folderName: document.getElementById("folder-name"),
     content: document.getElementById("content"),
     sidebar: document.getElementById("sidebar"),
@@ -329,8 +391,9 @@
       return;
     }
     el.folderName.textContent = sourceLabel + " · " + files.length + " foto(s) cargando…";
-    state.photos.forEach(function(p){ try{ URL.revokeObjectURL(p.url); }catch(e){} });
+    revokeAllBlobUrls();
     state.photos = [];
+    el.sourceInfo.textContent = "Local · sin subir fotos a internet";
 
     var pending = files.length;
     files.forEach(function(file){
@@ -377,6 +440,182 @@
     loaded = true;
     el.folderName.textContent = sourceLabel + " · " + count + " foto(s)";
     render();
+  }
+
+  function revokeAllBlobUrls(){
+    state.photos.forEach(function(p){
+      if(p.url && p.url.indexOf("blob:") === 0){
+        try{ URL.revokeObjectURL(p.url); }catch(e){}
+      }
+    });
+  }
+
+  // ---------- Remote server loading (HTTP directory listing) ----------
+  var IMAGE_EXT_RE = /\.(jpe?g|png|gif|webp|bmp|avif|heic|heif)$/i;
+  var MAX_REMOTE_FILES = 4000;
+  var MAX_REMOTE_DEPTH = 8;
+  var METADATA_CONCURRENCY = 8;
+
+  function parseDirectoryListing(html, baseUrl){
+    var doc = new DOMParser().parseFromString(html, "text/html");
+    var anchors = Array.prototype.slice.call(doc.querySelectorAll("a[href]"));
+    var baseOrigin = new URL(baseUrl).origin;
+    var results = [];
+    anchors.forEach(function(a){
+      var href = a.getAttribute("href");
+      if(!href) return;
+      if(href.charAt(0) === "?" || href.charAt(0) === "#") return; // sort-links, anchors
+      if(href === "../" || href === ".." || href === "/") return;  // parent-dir links
+      var resolved;
+      try{ resolved = new URL(href, baseUrl); }catch(e){ return; }
+      if(resolved.origin !== baseOrigin) return; // stay within the same server
+      var segments = resolved.pathname.split("/").filter(Boolean);
+      var name = segments.length ? decodeURIComponent(segments[segments.length - 1]) : "";
+      if(!name) return;
+      var isDir = /\/$/.test(resolved.pathname);
+      results.push({ url: resolved.href, name: name, isDir: isDir });
+    });
+    return results;
+  }
+
+  function crawlRemoteDirectory(rootUrl, onProgress){
+    var found = [];
+    var visited = {};
+
+    function visit(url, relPath, depth){
+      if(depth > MAX_REMOTE_DEPTH || found.length >= MAX_REMOTE_FILES) return Promise.resolve();
+      if(visited[url]) return Promise.resolve();
+      visited[url] = true;
+      return fetch(url, { credentials: "include" }).then(function(res){
+        if(!res.ok) throw new Error("HTTP " + res.status + " al listar " + url);
+        return res.text();
+      }).then(function(html){
+        var links = parseDirectoryListing(html, url);
+        var dirs = [], files = [];
+        links.forEach(function(link){
+          if(link.isDir) dirs.push(link);
+          else if(IMAGE_EXT_RE.test(link.name)) files.push(link);
+        });
+        files.forEach(function(link){
+          if(found.length >= MAX_REMOTE_FILES) return;
+          found.push({ url: link.url, name: link.name, path: relPath + link.name });
+          if(onProgress) onProgress(found.length);
+        });
+        var chain = Promise.resolve();
+        dirs.forEach(function(dir){
+          chain = chain.then(function(){
+            return visit(dir.url, relPath + dir.name + "/", depth + 1);
+          });
+        });
+        return chain;
+      });
+    }
+
+    return visit(rootUrl, "", 0).then(function(){ return found; });
+  }
+
+  function runWithConcurrency(items, limit, worker){
+    return new Promise(function(resolve){
+      var i = 0, active = 0, doneCount = 0;
+      if(items.length === 0) return resolve();
+      function next(){
+        while(active < limit && i < items.length){
+          (function(item){
+            i++; active++;
+            worker(item).catch(function(){}).finally(function(){
+              active--; doneCount++;
+              if(doneCount === items.length) resolve();
+              else next();
+            });
+          })(items[i]);
+        }
+      }
+      next();
+    });
+  }
+
+  function fetchRemoteMetadata(photo){
+    if(/\.jpe?g$/i.test(photo.name)){
+      return fetch(photo.url, { headers: { Range: "bytes=0-131071" }, credentials: "include" })
+        .then(function(res){
+          var lastMod = res.headers.get("Last-Modified");
+          if(lastMod) { photo.date = new Date(lastMod); photo.dateSource = "servidor"; }
+          return res.arrayBuffer();
+        })
+        .then(function(buf){
+          var exifDate = readExifDate(buf);
+          if(exifDate){ photo.date = exifDate; photo.dateSource = "exif"; }
+        })
+        .catch(function(){});
+    }
+    return fetch(photo.url, { method: "HEAD", credentials: "include" })
+      .then(function(res){
+        var lastMod = res.headers.get("Last-Modified");
+        if(lastMod){ photo.date = new Date(lastMod); photo.dateSource = "servidor"; }
+      })
+      .catch(function(){});
+  }
+
+  function loadFromRemoteServer(rootUrl){
+    setRemoteStatus("Buscando fotos en " + rootUrl + " …", null);
+    el.btnRemoteConnect.disabled = true;
+
+    crawlRemoteDirectory(rootUrl, function(count){
+      setRemoteStatus("Encontradas " + count + " foto(s)…", null);
+    }).then(function(found){
+      if(found.length === 0){
+        setRemoteStatus("No se encontraron imágenes en esa carpeta. Verificá que la URL muestre un listado de archivos.", "error");
+        el.btnRemoteConnect.disabled = false;
+        return;
+      }
+
+      revokeAllBlobUrls();
+      state.photos = found.map(function(f){
+        var parts = f.path.split("/");
+        parts.pop();
+        return {
+          name: f.name,
+          path: f.path,
+          folder: parts.length ? parts.join("/") : "(raíz)",
+          date: new Date(),
+          dateSource: "pendiente",
+          url: f.url
+        };
+      });
+      loaded = false;
+      el.folderName.textContent = "Servidor remoto · " + state.photos.length + " foto(s) cargando fechas…";
+      el.sourceInfo.textContent = "Remoto: " + rootUrl;
+      setRemoteStatus("Conectado. Cargando fechas de " + state.photos.length + " foto(s)…", "ok");
+      render();
+
+      runWithConcurrency(state.photos, METADATA_CONCURRENCY, fetchRemoteMetadata).then(function(){
+        el.folderName.textContent = "Servidor remoto · " + state.photos.length + " foto(s)";
+        render();
+      });
+
+      closeRemoteModal();
+    }).catch(function(err){
+      setRemoteStatus("No se pudo conectar: " + err.message, "error");
+      el.btnRemoteConnect.disabled = false;
+    });
+  }
+
+  function setRemoteStatus(text, kind){
+    el.remoteStatus.textContent = text;
+    el.remoteStatus.className = kind || "";
+  }
+
+  function openRemoteModal(){
+    if(!el.remoteUrl.value && /^https?:/.test(location.protocol)){
+      el.remoteUrl.value = location.href.replace(/[^/]*$/, "");
+    }
+    setRemoteStatus("", null);
+    el.btnRemoteConnect.disabled = false;
+    el.remoteModal.classList.add("open");
+    el.remoteUrl.focus();
+  }
+  function closeRemoteModal(){
+    el.remoteModal.classList.remove("open");
   }
 
   // ---------- Grouping / filtering / sorting ----------
@@ -539,7 +778,8 @@
     if(!p) return;
     el.lbImg.src = p.url;
     el.lbName.textContent = p.name;
-    el.lbPath.textContent = p.folder + "  ·  " + formatDate(p.date) + (p.dateSource === "exif" ? " (EXIF)" : "");
+    var dateLabel = p.dateSource === "exif" ? " (EXIF)" : p.dateSource === "servidor" ? " (servidor)" : "";
+    el.lbPath.textContent = p.folder + "  ·  " + formatDate(p.date) + dateLabel;
     el.lbCounter.textContent = (lbIndex+1) + " / " + state.filtered.length;
   }
   function closeLightbox(){ el.lightbox.classList.remove("open"); }
@@ -561,6 +801,24 @@
   el.btnOpenFolder.addEventListener("click", function(){ el.inputFolder.click(); });
   el.btnOpenFolder2.addEventListener("click", function(){ el.inputFolder.click(); });
   el.btnOpenFiles.addEventListener("click", function(){ el.inputFiles.click(); });
+
+  el.btnOpenRemote.addEventListener("click", openRemoteModal);
+  el.btnOpenRemote2.addEventListener("click", openRemoteModal);
+  el.btnRemoteCancel.addEventListener("click", closeRemoteModal);
+  el.remoteModal.addEventListener("click", function(e){ if(e.target === el.remoteModal) closeRemoteModal(); });
+  el.btnRemoteConnect.addEventListener("click", function(){
+    var url = el.remoteUrl.value.trim();
+    if(!url){ setRemoteStatus("Ingresá una URL.", "error"); return; }
+    if(!/^https?:\/\//i.test(url)){ setRemoteStatus("La URL debe empezar con http:// o https://", "error"); return; }
+    if(!/\/$/.test(url)) url += "/";
+    loadFromRemoteServer(url);
+  });
+  el.remoteUrl.addEventListener("keydown", function(e){
+    if(e.key === "Enter") el.btnRemoteConnect.click();
+  });
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape" && el.remoteModal.classList.contains("open")) closeRemoteModal();
+  });
 
   el.inputFolder.addEventListener("change", function(){
     loaded = false;
