@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galería de Fotos Local y Remota</title>
+<style>
+  :root{
+    --bg:#0f1115;
+    --bg-panel:#161922;
+    --bg-card:#1c202b;
+    --border:#2a2f3d;
+    --text:#e9ebf1;
+    --text-dim:#9aa1b2;
+    --accent:#5b8cff;
+    --accent-dim:#2c3b63;
+    --danger:#ff6b6b;
+    --radius:10px;
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f4f5f8;
+      --bg-panel:#ffffff;
+      --bg-card:#ffffff;
+      --border:#e2e4ea;
+      --text:#1b1e27;
+      --text-dim:#666d80;
+      --accent:#3a6df0;
+      --accent-dim:#dbe6ff;
+    }
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;height:100%;}
+  #app{display:flex;flex-direction:column;height:100vh;}
+
+  header{
+    padding:14px 20px;background:var(--bg-panel);border-bottom:1px solid var(--border);
+    display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  }
+  header h1{font-size:16px;margin:0;font-weight:600;white-space:nowrap;}
+  header h1 span{color:var(--text-dim);font-weight:400;font-size:12px;display:block;margin-top:2px;}
+
+  .btn{
+    background:var(--accent);color:#fff;border:none;border-radius:8px;padding:9px 16px;
+    font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;
+  }
+  .btn:hover{filter:brightness(1.08);}
+  .btn.secondary{background:transparent;color:var(--text);border:1px solid var(--border);}
+  .btn.secondary.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);}
+
+  #controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-left:auto;}
+  #search{
+    background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);
+    padding:8px 12px;font-size:13px;min-width:180px;
+  }
+  select{
+    background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);
+    padding:8px 10px;font-size:13px;
+  }
+  .segmented{display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+  .segmented button{
+    background:var(--bg-panel);color:var(--text-dim);border:none;padding:8px 14px;font-size:13px;cursor:pointer;
+  }
+  .segmented button.active{background:var(--accent);color:#fff;}
+
+  main{flex:1;display:flex;overflow:hidden;}
+
+  #sidebar{
+    width:260px;flex-shrink:0;background:var(--bg-panel);border-right:1px solid var(--border);
+    overflow-y:auto;padding:12px;
+  }
+  #sidebar h2{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin:8px 8px 8px;}
+  .group-item{
+    display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;
+    cursor:pointer;font-size:13px;color:var(--text);
+  }
+  .group-item:hover{background:var(--bg-card);}
+  .group-item.active{background:var(--accent-dim);color:var(--accent);font-weight:600;}
+  .group-item .count{font-size:11px;color:var(--text-dim);background:var(--bg);border-radius:20px;padding:1px 8px;}
+  .group-item.active .count{color:var(--accent);}
+
+  #content{flex:1;overflow-y:auto;padding:18px;}
+  #empty{
+    height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    color:var(--text-dim);text-align:center;gap:14px;padding:40px;
+  }
+  #empty .icon{font-size:52px;}
+  #empty p{max-width:420px;font-size:14px;line-height:1.6;margin:0;}
+  #empty code{background:var(--bg-card);padding:2px 6px;border-radius:5px;border:1px solid var(--border);}
+
+  .section-title{font-size:13px;font-weight:700;color:var(--text-dim);margin:22px 4px 10px;text-transform:uppercase;letter-spacing:.05em;}
+  .section-title:first-child{margin-top:0;}
+
+  #grid, .grid-section{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;
+  }
+
+  .thumb{
+    position:relative;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);
+    overflow:hidden;cursor:pointer;aspect-ratio:1/1;
+  }
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .2s ease;}
+  .thumb:hover img{transform:scale(1.05);}
+  .thumb .meta{
+    position:absolute;left:0;right:0;bottom:0;padding:6px 8px 5px;
+    background:linear-gradient(to top, rgba(0,0,0,.75), rgba(0,0,0,0));
+    color:#fff;font-size:10.5px;opacity:0;transition:opacity .15s ease;
+    display:flex;flex-direction:column;gap:1px;
+  }
+  .thumb:hover .meta{opacity:1;}
+  .thumb .meta .fname{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;}
+  .thumb .meta .fdate{color:#d6dbe8;}
+
+  footer{
+    padding:8px 20px;background:var(--bg-panel);border-top:1px solid var(--border);
+    font-size:12px;color:var(--text-dim);display:flex;justify-content:space-between;
+  }
+
+  /* Lightbox */
+  #lightbox{
+    position:fixed;inset:0;background:rgba(0,0,0,.94);display:none;z-index:1000;
+    align-items:center;justify-content:center;flex-direction:column;
+  }
+  #lightbox.open{display:flex;}
+  #lightbox img{max-width:92vw;max-height:78vh;object-fit:contain;border-radius:6px;box-shadow:0 10px 40px rgba(0,0,0,.5);}
+  #lightbox .lb-info{color:#fff;margin-top:14px;text-align:center;font-size:13px;opacity:.85;}
+  #lightbox .lb-info .lb-path{color:#9aa1b2;font-size:11.5px;margin-top:2px;}
+  .lb-btn{
+    position:absolute;top:0;bottom:0;width:80px;background:transparent;border:none;color:#fff;
+    font-size:32px;cursor:pointer;opacity:.55;transition:opacity .15s;
+  }
+  .lb-btn:hover{opacity:1;}
+  #lb-prev{left:0;}
+  #lb-next{right:0;}
+  #lb-close{
+    position:absolute;top:16px;right:20px;background:transparent;border:none;color:#fff;
+    font-size:26px;cursor:pointer;opacity:.7;
+  }
+  #lb-close:hover{opacity:1;}
+  #lb-counter{position:absolute;top:20px;left:20px;color:#fff;font-size:13px;opacity:.75;}
+
+  input[type="file"]{display:none;}
+
+  #dropzone-hint{
+    position:fixed;inset:0;background:rgba(59,109,240,.15);border:3px dashed var(--accent);
+    display:none;align-items:center;justify-content:center;z-index:999;font-size:20px;font-weight:600;
+    color:var(--accent);pointer-events:none;
+  }
+  #dropzone-hint.show{display:flex;}
+
+  /* Remote-connect modal */
+  #remote-modal{
+    position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;z-index:1001;
+    align-items:center;justify-content:center;padding:20px;
+  }
+  #remote-modal.open{display:flex;}
+  #remote-modal .box{
+    background:var(--bg-panel);border:1px solid var(--border);border-radius:12px;
+    padding:22px;max-width:520px;width:100%;
+  }
+  #remote-modal h3{margin:0 0 6px;font-size:16px;}
+  #remote-modal p{margin:0 0 14px;font-size:13px;color:var(--text-dim);line-height:1.5;}
+  #remote-modal label{font-size:12px;font-weight:600;display:block;margin-bottom:6px;}
+  #remote-url{
+    width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);
+    padding:10px 12px;font-size:13px;margin-bottom:6px;
+  }
+  #remote-hint{font-size:11.5px;color:var(--text-dim);margin-bottom:16px;}
+  #remote-status{font-size:12.5px;margin:10px 0 0;min-height:18px;}
+  #remote-status.error{color:var(--danger);}
+  #remote-status.ok{color:#5fd68a;}
+  .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:6px;}
+
+  ::-webkit-scrollbar{width:10px;height:10px;}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:6px;}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>📷 Galería de Fotos
+      <span id="folder-name">Ninguna carpeta cargada</span>
+    </h1>
+    <button class="btn" id="btn-open-folder">Elegir carpeta…</button>
+    <button class="btn secondary" id="btn-open-files">Elegir archivos…</button>
+    <button class="btn secondary" id="btn-open-remote">Servidor remoto (HTTP)…</button>
+    <input type="file" id="input-folder" webkitdirectory directory multiple accept="image/*">
+    <input type="file" id="input-files" multiple accept="image/*">
+
+    <div id="controls">
+      <input type="text" id="search" placeholder="Buscar por nombre…">
+      <div class="segmented" id="view-mode">
+        <button data-mode="folder" class="active">Por carpeta</button>
+        <button data-mode="date">Por fecha</button>
+        <button data-mode="all">Todas</button>
+      </div>
+      <select id="sort-order">
+        <option value="date-desc">Más recientes primero</option>
+        <option value="date-asc">Más antiguas primero</option>
+        <option value="name-asc">Nombre (A-Z)</option>
+        <option value="name-desc">Nombre (Z-A)</option>
+      </select>
+    </div>
+  </header>
+
+  <main>
+    <div id="sidebar" hidden></div>
+    <div id="content">
+      <div id="empty">
+        <div class="icon">🖼️</div>
+        <p>
+          Elegí una carpeta local con fotos (por ejemplo, una unidad de red mapeada de tu NAS,
+          o cualquier carpeta de tu computadora), o conectate a un <strong>servidor remoto</strong>
+          para acceder a tus fotos desde fuera de tu red local (recomendado: NAS + VPN personal
+          como Tailscale — ver el <code>README.md</code>).<br><br>
+          En modo local, todo se procesa <strong>en tu navegador</strong> y ninguna foto se sube a
+          internet; en modo remoto, las fotos viajan solo entre tu navegador y tu propio servidor.
+        </p>
+        <div style="display:flex;gap:10px;">
+          <button class="btn" id="btn-open-folder-2">Elegir carpeta…</button>
+          <button class="btn secondary" id="btn-open-remote-2">Servidor remoto (HTTP)…</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <span id="status">Sin fotos cargadas</span>
+    <span id="source-info">Local · sin subir fotos a internet</span>
+  </footer>
+</div>
+
+<div id="dropzone-hint">Soltá la carpeta o las fotos acá</div>
+
+<div id="remote-modal">
+  <div class="box">
+    <h3>Conectar a un servidor remoto</h3>
+    <p>
+      Pegá la URL de una carpeta servida por HTTP que contenga tus fotos (por ejemplo, un
+      servidor de archivos corriendo en tu NAS y accesible mediante tu VPN personal como
+      Tailscale). La página necesita mostrar un <em>listado de carpeta</em> (autoindex) —
+      funciona con Apache, nginx, Caddy, <code>python3 -m http.server</code>, etc.
+    </p>
+    <label for="remote-url">URL de la carpeta</label>
+    <input type="text" id="remote-url" placeholder="http://mi-nas.tailnet.ts.net:8080/Fotos/" autocomplete="off">
+    <div id="remote-hint">
+      Si el servidor pide usuario y contraseña, el navegador te los va a pedir de forma nativa
+      la primera vez. Para usarla fuera de casa, primero conectá tu dispositivo a la misma VPN
+      que el NAS (ver el <code>README.md</code> del proyecto).
+    </div>
+    <div id="remote-status"></div>
+    <div class="modal-actions">
+      <button class="btn secondary" id="btn-remote-cancel">Cancelar</button>
+      <button class="btn" id="btn-remote-connect">Conectar</button>
+    </div>
+  </div>
+</div>
+
+<div id="lightbox">
+  <button id="lb-close">✕</button>
+  <span id="lb-counter"></span>
+  <button class="lb-btn" id="lb-prev">‹</button>
+  <img id="lb-img" src="" alt="">
+  <button class="lb-btn" id="lb-next">›</button>
+  <div class="lb-info">
+    <div id="lb-name"></div>
+    <div class="lb-path" id="lb-path"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var state = {
+    photos: [],        // {file, name, path, folder, date, url}
+    filtered: [],       // currently displayed (after search/sort)
+    mode: "folder",      // folder | date | all
+    sort: "date-desc",
+    activeGroup: null,    // selected sidebar group key, or null = all
+    search: ""
+  };
+
+  var el = {
+    inputFolder: document.getElementById("input-folder"),
+    inputFiles: document.getElementById("input-files"),
+    btnOpenFolder: document.getElementById("btn-open-folder"),
+    btnOpenFolder2: document.getElementById("btn-open-folder-2"),
+    btnOpenFiles: document.getElementById("btn-open-files"),
+    btnOpenRemote: document.getElementById("btn-open-remote"),
+    btnOpenRemote2: document.getElementById("btn-open-remote-2"),
+    remoteModal: document.getElementById("remote-modal"),
+    remoteUrl: document.getElementById("remote-url"),
+    remoteStatus: document.getElementById("remote-status"),
+    btnRemoteConnect: document.getElementById("btn-remote-connect"),
+    btnRemoteCancel: document.getElementById("btn-remote-cancel"),
+    sourceInfo: document.getElementById("source-info"),
+    folderName: document.getElementById("folder-name"),
+    content: document.getElementById("content"),
+    sidebar: document.getElementById("sidebar"),
+    status: document.getElementById("status"),
+    search: document.getElementById("search"),
+    sortOrder: document.getElementById("sort-order"),
+    viewMode: document.getElementById("view-mode"),
+    dropHint: document.getElementById("dropzone-hint"),
+    lightbox: document.getElementById("lightbox"),
+    lbImg: document.getElementById("lb-img"),
+    lbName: document.getElementById("lb-name"),
+    lbPath: document.getElementById("lb-path"),
+    lbCounter: document.getElementById("lb-counter"),
+    lbPrev: document.getElementById("lb-prev"),
+    lbNext: document.getElementById("lb-next"),
+    lbClose: document.getElementById("lb-close")
+  };
+
+  var MONTHS = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+
+  // ---------- EXIF date extraction (minimal, JPEG only) ----------
+  function readExifDate(arrayBuffer){
+    try{
+      var view = new DataView(arrayBuffer);
+      if(view.getUint16(0) !== 0xFFD8) return null; // not JPEG
+      var offset = 2, length = view.byteLength;
+      while(offset < length){
+        var marker = view.getUint16(offset);
+        offset += 2;
+        if(marker === 0xFFE1){ // APP1 (EXIF)
+          var exifLength = view.getUint16(offset);
+          var start = offset + 2;
+          if(view.getUint32(start) !== 0x45786966) return null; // "Exif"
+          var tiffOffset = start + 6;
+          var little = view.getUint16(tiffOffset) === 0x4949;
+          var firstIFD = view.getUint32(tiffOffset + 4, little);
+          var date = scanIFD(view, tiffOffset, tiffOffset + firstIFD, little);
+          return date;
+        } else if((marker & 0xFF00) !== 0xFF00){
+          break;
+        } else {
+          offset += view.getUint16(offset);
+        }
+      }
+    }catch(e){ /* ignore malformed exif */ }
+    return null;
+  }
+
+  function scanIFD(view, tiffStart, ifdOffset, little){
+    try{
+      var entries = view.getUint16(ifdOffset, little);
+      var exifSubOffset = null, dateStr = null;
+      for(var i=0;i<entries;i++){
+        var entryOffset = ifdOffset + 2 + i*12;
+        var tag = view.getUint16(entryOffset, little);
+        if(tag === 0x8769){ // ExifIFD pointer
+          exifSubOffset = view.getUint32(entryOffset + 8, little);
+        }
+        if(tag === 0x0132 || tag === 0x9003 || tag === 0x9004){ // DateTime, DateTimeOriginal, DateTimeDigitized
+          var valOffset = entryOffset + 8;
+          var str = "";
+          for(var j=0;j<19;j++){
+            var code = view.getUint8(tiffStart + view.getUint32(valOffset, little) + j);
+            if(code === 0) break;
+            str += String.fromCharCode(code);
+          }
+          if(str) dateStr = str;
+        }
+      }
+      if(!dateStr && exifSubOffset != null){
+        var d2 = scanIFD(view, tiffStart, tiffStart + exifSubOffset, little);
+        if(d2) dateStr = d2.raw;
+      }
+      if(dateStr){
+        // format: "YYYY:MM:DD HH:MM:SS"
+        var m = dateStr.match(/^(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2}):(\d{2})/);
+        if(m){
+          var d = new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5], +m[6]);
+          d.raw = dateStr;
+          return d;
+        }
+      }
+    }catch(e){}
+    return null;
+  }
+
+  // ---------- File loading ----------
+  function handleFileList(fileList, sourceLabel){
+    var files = Array.prototype.filter.call(fileList, function(f){
+      return f.type && f.type.indexOf("image/") === 0;
+    });
+    if(files.length === 0){
+      alert("No se encontraron imágenes en la selección.");
+      return;
+    }
+    el.folderName.textContent = sourceLabel + " · " + files.length + " foto(s) cargando…";
+    revokeAllBlobUrls();
+    state.photos = [];
+    el.sourceInfo.textContent = "Local · sin subir fotos a internet";
+
+    var pending = files.length;
+    files.forEach(function(file){
+      var relPath = file.webkitRelativePath || file.name;
+      var parts = relPath.split("/");
+      parts.pop();
+      var folder = parts.length ? parts.join("/") : "(raíz)";
+      var photo = {
+        file: file,
+        name: file.name,
+        path: relPath,
+        folder: folder,
+        date: new Date(file.lastModified),
+        dateSource: "archivo",
+        url: URL.createObjectURL(file)
+      };
+      state.photos.push(photo);
+
+      // Try EXIF for jpeg files (read only first 128KB, enough for header)
+      if(/\.jpe?g$/i.test(file.name)){
+        file.slice(0, 131072).arrayBuffer().then(function(buf){
+          var exifDate = readExifDate(buf);
+          if(exifDate){
+            photo.date = exifDate;
+            photo.dateSource = "exif";
+          }
+        }).catch(function(){}).finally(function(){
+          pending--;
+          if(pending === 0) finishLoad(sourceLabel, files.length);
+        });
+      } else {
+        pending--;
+        if(pending === 0) finishLoad(sourceLabel, files.length);
+      }
+    });
+
+    // Fallback in case pending never reaches 0 due to promise timing quirks
+    setTimeout(function(){ if(state.photos.length === files.length) finishLoad(sourceLabel, files.length); }, 3000);
+  }
+
+  var loaded = false;
+  function finishLoad(sourceLabel, count){
+    if(loaded) { render(); return; }
+    loaded = true;
+    el.folderName.textContent = sourceLabel + " · " + count + " foto(s)";
+    render();
+  }
+
+  function revokeAllBlobUrls(){
+    state.photos.forEach(function(p){
+      if(p.url && p.url.indexOf("blob:") === 0){
+        try{ URL.revokeObjectURL(p.url); }catch(e){}
+      }
+    });
+  }
+
+  // ---------- Remote server loading (HTTP directory listing) ----------
+  var IMAGE_EXT_RE = /\.(jpe?g|png|gif|webp|bmp|avif|heic|heif)$/i;
+  var MAX_REMOTE_FILES = 4000;
+  var MAX_REMOTE_DEPTH = 8;
+  var METADATA_CONCURRENCY = 8;
+
+  function parseDirectoryListing(html, baseUrl){
+    var doc = new DOMParser().parseFromString(html, "text/html");
+    var anchors = Array.prototype.slice.call(doc.querySelectorAll("a[href]"));
+    var baseOrigin = new URL(baseUrl).origin;
+    var results = [];
+    anchors.forEach(function(a){
+      var href = a.getAttribute("href");
+      if(!href) return;
+      if(href.charAt(0) === "?" || href.charAt(0) === "#") return; // sort-links, anchors
+      if(href === "../" || href === ".." || href === "/") return;  // parent-dir links
+      var resolved;
+      try{ resolved = new URL(href, baseUrl); }catch(e){ return; }
+      if(resolved.origin !== baseOrigin) return; // stay within the same server
+      var segments = resolved.pathname.split("/").filter(Boolean);
+      var name = segments.length ? decodeURIComponent(segments[segments.length - 1]) : "";
+      if(!name) return;
+      var isDir = /\/$/.test(resolved.pathname);
+      results.push({ url: resolved.href, name: name, isDir: isDir });
+    });
+    return results;
+  }
+
+  function crawlRemoteDirectory(rootUrl, onProgress){
+    var found = [];
+    var visited = {};
+
+    function visit(url, relPath, depth){
+      if(depth > MAX_REMOTE_DEPTH || found.length >= MAX_REMOTE_FILES) return Promise.resolve();
+      if(visited[url]) return Promise.resolve();
+      visited[url] = true;
+      return fetch(url, { credentials: "include" }).then(function(res){
+        if(!res.ok) throw new Error("HTTP " + res.status + " al listar " + url);
+        return res.text();
+      }).then(function(html){
+        var links = parseDirectoryListing(html, url);
+        var dirs = [], files = [];
+        links.forEach(function(link){
+          if(link.isDir) dirs.push(link);
+          else if(IMAGE_EXT_RE.test(link.name)) files.push(link);
+        });
+        files.forEach(function(link){
+          if(found.length >= MAX_REMOTE_FILES) return;
+          found.push({ url: link.url, name: link.name, path: relPath + link.name });
+          if(onProgress) onProgress(found.length);
+        });
+        var chain = Promise.resolve();
+        dirs.forEach(function(dir){
+          chain = chain.then(function(){
+            return visit(dir.url, relPath + dir.name + "/", depth + 1);
+          });
+        });
+        return chain;
+      });
+    }
+
+    return visit(rootUrl, "", 0).then(function(){ return found; });
+  }
+
+  function runWithConcurrency(items, limit, worker){
+    return new Promise(function(resolve){
+      var i = 0, active = 0, doneCount = 0;
+      if(items.length === 0) return resolve();
+      function next(){
+        while(active < limit && i < items.length){
+          (function(item){
+            i++; active++;
+            worker(item).catch(function(){}).finally(function(){
+              active--; doneCount++;
+              if(doneCount === items.length) resolve();
+              else next();
+            });
+          })(items[i]);
+        }
+      }
+      next();
+    });
+  }
+
+  function fetchRemoteMetadata(photo){
+    if(/\.jpe?g$/i.test(photo.name)){
+      return fetch(photo.url, { headers: { Range: "bytes=0-131071" }, credentials: "include" })
+        .then(function(res){
+          var lastMod = res.headers.get("Last-Modified");
+          if(lastMod) { photo.date = new Date(lastMod); photo.dateSource = "servidor"; }
+          return res.arrayBuffer();
+        })
+        .then(function(buf){
+          var exifDate = readExifDate(buf);
+          if(exifDate){ photo.date = exifDate; photo.dateSource = "exif"; }
+        })
+        .catch(function(){});
+    }
+    return fetch(photo.url, { method: "HEAD", credentials: "include" })
+      .then(function(res){
+        var lastMod = res.headers.get("Last-Modified");
+        if(lastMod){ photo.date = new Date(lastMod); photo.dateSource = "servidor"; }
+      })
+      .catch(function(){});
+  }
+
+  function loadFromRemoteServer(rootUrl){
+    setRemoteStatus("Buscando fotos en " + rootUrl + " …", null);
+    el.btnRemoteConnect.disabled = true;
+
+    crawlRemoteDirectory(rootUrl, function(count){
+      setRemoteStatus("Encontradas " + count + " foto(s)…", null);
+    }).then(function(found){
+      if(found.length === 0){
+        setRemoteStatus("No se encontraron imágenes en esa carpeta. Verificá que la URL muestre un listado de archivos.", "error");
+        el.btnRemoteConnect.disabled = false;
+        return;
+      }
+
+      revokeAllBlobUrls();
+      state.photos = found.map(function(f){
+        var parts = f.path.split("/");
+        parts.pop();
+        return {
+          name: f.name,
+          path: f.path,
+          folder: parts.length ? parts.join("/") : "(raíz)",
+          date: new Date(),
+          dateSource: "pendiente",
+          url: f.url
+        };
+      });
+      loaded = false;
+      el.folderName.textContent = "Servidor remoto · " + state.photos.length + " foto(s) cargando fechas…";
+      el.sourceInfo.textContent = "Remoto: " + rootUrl;
+      setRemoteStatus("Conectado. Cargando fechas de " + state.photos.length + " foto(s)…", "ok");
+      render();
+
+      runWithConcurrency(state.photos, METADATA_CONCURRENCY, fetchRemoteMetadata).then(function(){
+        el.folderName.textContent = "Servidor remoto · " + state.photos.length + " foto(s)";
+        render();
+      });
+
+      closeRemoteModal();
+    }).catch(function(err){
+      setRemoteStatus("No se pudo conectar: " + err.message, "error");
+      el.btnRemoteConnect.disabled = false;
+    });
+  }
+
+  function setRemoteStatus(text, kind){
+    el.remoteStatus.textContent = text;
+    el.remoteStatus.className = kind || "";
+  }
+
+  function openRemoteModal(){
+    if(!el.remoteUrl.value && /^https?:/.test(location.protocol)){
+      el.remoteUrl.value = location.href.replace(/[^/]*$/, "");
+    }
+    setRemoteStatus("", null);
+    el.btnRemoteConnect.disabled = false;
+    el.remoteModal.classList.add("open");
+    el.remoteUrl.focus();
+  }
+  function closeRemoteModal(){
+    el.remoteModal.classList.remove("open");
+  }
+
+  // ---------- Grouping / filtering / sorting ----------
+  function dateKey(d){
+    return MONTHS[d.getMonth()] + " " + d.getFullYear();
+  }
+  function dateKeySort(d){
+    return d.getFullYear() * 100 + d.getMonth();
+  }
+
+  function getGroups(){
+    var groups = {};
+    state.photos.forEach(function(p){
+      var key = state.mode === "date" ? dateKey(p.date) : p.folder;
+      if(!groups[key]) groups[key] = [];
+      groups[key].push(p);
+    });
+    return groups;
+  }
+
+  function applyFilters(list){
+    var q = state.search.trim().toLowerCase();
+    if(q){
+      list = list.filter(function(p){ return p.name.toLowerCase().indexOf(q) !== -1; });
+    }
+    list = list.slice();
+    list.sort(function(a,b){
+      switch(state.sort){
+        case "date-asc": return a.date - b.date;
+        case "name-asc": return a.name.localeCompare(b.name);
+        case "name-desc": return b.name.localeCompare(a.name);
+        case "date-desc":
+        default: return b.date - a.date;
+      }
+    });
+    return list;
+  }
+
+  // ---------- Rendering ----------
+  function render(){
+    if(state.photos.length === 0){
+      el.sidebar.hidden = true;
+      el.content.innerHTML = document.getElementById("empty").outerHTML;
+      return;
+    }
+
+    renderSidebar();
+    renderContent();
+    updateStatus();
+  }
+
+  function renderSidebar(){
+    if(state.mode === "all"){
+      el.sidebar.hidden = true;
+      return;
+    }
+    el.sidebar.hidden = false;
+    var groups = getGroups();
+    var keys = Object.keys(groups);
+    if(state.mode === "date"){
+      keys.sort(function(a,b){ return dateKeySort(groups[b][0].date) - dateKeySort(groups[a][0].date); });
+    } else {
+      keys.sort(function(a,b){ return a.localeCompare(b); });
+    }
+
+    var html = '<h2>' + (state.mode === "date" ? "Fechas" : "Carpetas") + '</h2>';
+    html += '<div class="group-item' + (state.activeGroup === null ? ' active' : '') + '" data-key="">Todas <span class="count">' + state.photos.length + '</span></div>';
+    keys.forEach(function(k){
+      var active = state.activeGroup === k;
+      html += '<div class="group-item' + (active ? ' active' : '') + '" data-key="' + escapeHtml(k) + '">' +
+              escapeHtml(k) + ' <span class="count">' + groups[k].length + '</span></div>';
+    });
+    el.sidebar.innerHTML = html;
+
+    Array.prototype.forEach.call(el.sidebar.querySelectorAll(".group-item"), function(item){
+      item.addEventListener("click", function(){
+        state.activeGroup = item.getAttribute("data-key") || null;
+        render();
+      });
+    });
+  }
+
+  function renderContent(){
+    var groups = getGroups();
+    var sections = [];
+
+    if(state.mode === "all"){
+      sections.push({ title: null, photos: applyFilters(state.photos) });
+    } else if(state.activeGroup !== null){
+      sections.push({ title: state.activeGroup, photos: applyFilters(groups[state.activeGroup] || []) });
+    } else {
+      var keys = Object.keys(groups);
+      if(state.mode === "date"){
+        keys.sort(function(a,b){ return dateKeySort(groups[b][0].date) - dateKeySort(groups[a][0].date); });
+      } else {
+        keys.sort(function(a,b){ return a.localeCompare(b); });
+      }
+      keys.forEach(function(k){
+        sections.push({ title: k, photos: applyFilters(groups[k]) });
+      });
+    }
+
+    state.filtered = [];
+    sections.forEach(function(s){ state.filtered = state.filtered.concat(s.photos); });
+
+    var html = "";
+    sections.forEach(function(sec){
+      if(sec.photos.length === 0) return;
+      if(sec.title) html += '<div class="section-title">' + escapeHtml(sec.title) + '</div>';
+      html += '<div class="grid-section">';
+      sec.photos.forEach(function(p){
+        var idx = state.filtered.indexOf(p);
+        html += '<div class="thumb" data-idx="' + idx + '">' +
+                  '<img loading="lazy" src="' + p.url + '" alt="' + escapeHtml(p.name) + '">' +
+                  '<div class="meta"><div class="fname">' + escapeHtml(p.name) + '</div>' +
+                  '<div class="fdate">' + formatDate(p.date) + '</div></div>' +
+                '</div>';
+      });
+      html += '</div>';
+    });
+
+    if(!html){
+      html = '<div id="empty"><div class="icon">🔍</div><p>No se encontraron fotos con ese filtro.</p></div>';
+    }
+
+    el.content.innerHTML = html;
+
+    Array.prototype.forEach.call(el.content.querySelectorAll(".thumb"), function(t){
+      t.addEventListener("click", function(){
+        openLightbox(parseInt(t.getAttribute("data-idx"), 10));
+      });
+    });
+  }
+
+  function updateStatus(){
+    el.status.textContent = state.filtered.length + " de " + state.photos.length + " foto(s) mostradas";
+  }
+
+  function formatDate(d){
+    if(!d || isNaN(d.getTime())) return "";
+    var dd = String(d.getDate()).padStart(2,"0");
+    return dd + " " + MONTHS[d.getMonth()].slice(0,3) + " " + d.getFullYear();
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+
+  // ---------- Lightbox ----------
+  var lbIndex = -1;
+  function openLightbox(idx){
+    lbIndex = idx;
+    updateLightbox();
+    el.lightbox.classList.add("open");
+  }
+  function updateLightbox(){
+    var p = state.filtered[lbIndex];
+    if(!p) return;
+    el.lbImg.src = p.url;
+    el.lbName.textContent = p.name;
+    var dateLabel = p.dateSource === "exif" ? " (EXIF)" : p.dateSource === "servidor" ? " (servidor)" : "";
+    el.lbPath.textContent = p.folder + "  ·  " + formatDate(p.date) + dateLabel;
+    el.lbCounter.textContent = (lbIndex+1) + " / " + state.filtered.length;
+  }
+  function closeLightbox(){ el.lightbox.classList.remove("open"); }
+  function nextPhoto(){ lbIndex = (lbIndex+1) % state.filtered.length; updateLightbox(); }
+  function prevPhoto(){ lbIndex = (lbIndex-1+state.filtered.length) % state.filtered.length; updateLightbox(); }
+
+  el.lbClose.addEventListener("click", closeLightbox);
+  el.lbNext.addEventListener("click", nextPhoto);
+  el.lbPrev.addEventListener("click", prevPhoto);
+  el.lightbox.addEventListener("click", function(e){ if(e.target === el.lightbox) closeLightbox(); });
+  document.addEventListener("keydown", function(e){
+    if(!el.lightbox.classList.contains("open")) return;
+    if(e.key === "Escape") closeLightbox();
+    if(e.key === "ArrowRight") nextPhoto();
+    if(e.key === "ArrowLeft") prevPhoto();
+  });
+
+  // ---------- Controls ----------
+  el.btnOpenFolder.addEventListener("click", function(){ el.inputFolder.click(); });
+  el.btnOpenFolder2.addEventListener("click", function(){ el.inputFolder.click(); });
+  el.btnOpenFiles.addEventListener("click", function(){ el.inputFiles.click(); });
+
+  el.btnOpenRemote.addEventListener("click", openRemoteModal);
+  el.btnOpenRemote2.addEventListener("click", openRemoteModal);
+  el.btnRemoteCancel.addEventListener("click", closeRemoteModal);
+  el.remoteModal.addEventListener("click", function(e){ if(e.target === el.remoteModal) closeRemoteModal(); });
+  el.btnRemoteConnect.addEventListener("click", function(){
+    var url = el.remoteUrl.value.trim();
+    if(!url){ setRemoteStatus("Ingresá una URL.", "error"); return; }
+    if(!/^https?:\/\//i.test(url)){ setRemoteStatus("La URL debe empezar con http:// o https://", "error"); return; }
+    if(!/\/$/.test(url)) url += "/";
+    loadFromRemoteServer(url);
+  });
+  el.remoteUrl.addEventListener("keydown", function(e){
+    if(e.key === "Enter") el.btnRemoteConnect.click();
+  });
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape" && el.remoteModal.classList.contains("open")) closeRemoteModal();
+  });
+
+  el.inputFolder.addEventListener("change", function(){
+    loaded = false;
+    var label = "Carpeta";
+    var first = el.inputFolder.files[0];
+    if(first && first.webkitRelativePath){
+      label = first.webkitRelativePath.split("/")[0];
+    }
+    handleFileList(el.inputFolder.files, label);
+  });
+  el.inputFiles.addEventListener("change", function(){
+    loaded = false;
+    handleFileList(el.inputFiles.files, "Archivos seleccionados");
+  });
+
+  el.search.addEventListener("input", function(){
+    state.search = el.search.value;
+    renderContent();
+    updateStatus();
+  });
+  el.sortOrder.addEventListener("change", function(){
+    state.sort = el.sortOrder.value;
+    renderContent();
+    updateStatus();
+  });
+  Array.prototype.forEach.call(el.viewMode.querySelectorAll("button"), function(btn){
+    btn.addEventListener("click", function(){
+      Array.prototype.forEach.call(el.viewMode.querySelectorAll("button"), function(b){ b.classList.remove("active"); });
+      btn.classList.add("active");
+      state.mode = btn.getAttribute("data-mode");
+      state.activeGroup = null;
+      render();
+    });
+  });
+
+  // ---------- Drag & drop (folder-aware) ----------
+  var dragCounter = 0;
+  window.addEventListener("dragenter", function(e){
+    e.preventDefault();
+    dragCounter++;
+    el.dropHint.classList.add("show");
+  });
+  window.addEventListener("dragleave", function(e){
+    dragCounter--;
+    if(dragCounter <= 0){ el.dropHint.classList.remove("show"); dragCounter = 0; }
+  });
+  window.addEventListener("dragover", function(e){ e.preventDefault(); });
+  window.addEventListener("drop", function(e){
+    e.preventDefault();
+    dragCounter = 0;
+    el.dropHint.classList.remove("show");
+
+    var items = e.dataTransfer.items;
+    if(items && items.length && items[0].webkitGetAsEntry){
+      var entries = [];
+      for(var i=0;i<items.length;i++){
+        var entry = items[i].webkitGetAsEntry();
+        if(entry) entries.push(entry);
+      }
+      collectFilesFromEntries(entries).then(function(files){
+        loaded = false;
+        handleFileList(files, "Elementos soltados");
+      });
+    } else {
+      loaded = false;
+      handleFileList(e.dataTransfer.files, "Elementos soltados");
+    }
+  });
+
+  function collectFilesFromEntries(entries){
+    var files = [];
+    function walk(entry, prefix){
+      return new Promise(function(resolve){
+        if(entry.isFile){
+          entry.file(function(file){
+            try{
+              Object.defineProperty(file, "webkitRelativePath", { value: prefix + file.name });
+            }catch(e){}
+            files.push(file);
+            resolve();
+          }, resolve);
+        } else if(entry.isDirectory){
+          var reader = entry.createReader();
+          var allEntries = [];
+          function readBatch(){
+            reader.readEntries(function(batch){
+              if(!batch.length){
+                Promise.all(allEntries.map(function(en){ return walk(en, prefix + entry.name + "/"); })).then(resolve);
+                return;
+              }
+              allEntries = allEntries.concat(batch);
+              readBatch();
+            }, resolve);
+          }
+          readBatch();
+        } else {
+          resolve();
+        }
+      });
+    }
+    return Promise.all(entries.map(function(en){ return walk(en, ""); })).then(function(){ return files; });
+  }
+
+})();
+</script>
+</body>
+</html>
